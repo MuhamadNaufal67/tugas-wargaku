@@ -12,7 +12,10 @@ import {
   generateLetterFileName,
   prepareSubmissionPdf,
 } from "@/lib/pengajuan";
-import { logAuthWarning } from "@/lib/supabaseAuthErrors";
+import {
+  formatSupabaseError,
+  logAuthWarning,
+} from "@/lib/supabaseAuthErrors";
 import type { PengajuanRow } from "@/lib/supabaseClient";
 
 type StatusFilter = "semua" | "pending" | "diproses" | "selesai" | "ditolak";
@@ -224,7 +227,7 @@ export default function StatusPage() {
       showToast(
         "warning",
         "Akses terbatas",
-        "Hanya admin yang dapat memperbarui status pengajuan.",
+        "Hanya pengurus yang dapat memperbarui status pengajuan.",
       );
       return;
     }
@@ -304,17 +307,17 @@ export default function StatusPage() {
       if (item.user_id) {
         const notificationTitle =
           nextStatus === "ditolak"
-            ? "Pengajuan ditolak"
+            ? "Perlu perbaikan data"
             : nextStatus === "selesai"
-              ? "Surat siap diunduh"
-              : "Status pengajuan diperbarui";
+              ? "Surat sudah siap"
+              : "Perkembangan pengajuan";
 
         const notificationMessage =
           nextStatus === "ditolak"
-            ? `Pengajuan ${item.jenis_surat} ditolak. Alasan: ${options?.alasanPenolakan ?? "Tidak ada alasan."}`
+            ? `${item.jenis_surat} perlu diperbaiki. Catatan pengurus: ${options?.alasanPenolakan ?? "Silakan periksa kembali data pengajuan Anda."}`
             : nextStatus === "selesai"
-              ? `Pengajuan ${item.jenis_surat} telah selesai dan surat dapat diunduh.`
-              : `Status pengajuan ${item.jenis_surat} diubah menjadi ${getStatusLabel(nextStatus)}.`;
+              ? `${item.jenis_surat} sudah selesai diproses dan surat dapat diunduh.`
+              : `${item.jenis_surat} kini berada pada tahap ${getStatusLabel(nextStatus)}.`;
 
         try {
           await createNotification({
@@ -335,8 +338,8 @@ export default function StatusPage() {
           });
           showToast(
             "warning",
-            "Status tersimpan",
-            "Status berhasil diperbarui, tetapi notifikasi gagal dikirim.",
+            "Perubahan tersimpan",
+            `Perubahan layanan berhasil disimpan, tetapi pemberitahuan belum dapat dikirim. ${formatSupabaseError(notificationError)}`,
           );
         }
       }
@@ -349,10 +352,10 @@ export default function StatusPage() {
 
       showToast(
         "success",
-        "Status diperbarui",
+        "Perubahan tersimpan",
         nextStatus === "selesai" && generatedPdfMessage
-          ? `Status berhasil diubah ke ${getStatusLabel(nextStatus)}. ${generatedPdfMessage}`
-          : `Status berhasil diubah ke ${getStatusLabel(nextStatus)}.`,
+          ? `Tahap layanan berhasil diubah ke ${getStatusLabel(nextStatus)}. ${generatedPdfMessage}`
+          : `Tahap layanan berhasil diubah ke ${getStatusLabel(nextStatus)}.`,
       );
     } catch (error) {
       setDataPengajuan((current) =>
@@ -442,8 +445,8 @@ export default function StatusPage() {
     if (!trimmedReason) {
       showToast(
         "warning",
-        "Alasan wajib diisi",
-        "Isi alasan penolakan sebelum mengubah status menjadi ditolak.",
+        "Catatan belum diisi",
+        "Isi catatan perbaikan sebelum mengubah status menjadi ditolak.",
       );
       return;
     }
@@ -459,7 +462,7 @@ export default function StatusPage() {
 
   function handleDownload(item: PengajuanRow) {
     downloadSubmissionPdf(item);
-    showToast("success", "Download dimulai", "PDF surat berhasil diunduh.");
+    showToast("success", "Unduhan dimulai", "Surat PDF sedang diunduh.");
   }
 
   function handleReapply(item: PengajuanRow) {
@@ -512,16 +515,16 @@ export default function StatusPage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <span className="inline-flex rounded-full bg-[var(--color-primary-soft)] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-primary)]">
-              {isAdmin ? "Panel Admin" : "Status Pengajuan"}
+              {isAdmin ? "Panel Pengurus" : "Status Pengajuan"}
             </span>
             <h1 className="mt-3 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl lg:text-4xl">
               {isAdmin
                 ? "Kelola seluruh pengajuan surat warga dari satu halaman."
-                : "Pantau progres pengajuan surat Anda secara real-time."}
+                : "Pantau perkembangan pengajuan surat Anda secara langsung."}
             </h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-500 sm:text-base">
-              Halaman ini menggabungkan pemantauan status, aksi admin, preview
-              template surat resmi, dan update realtime dari data pengajuan.
+              Halaman ini membantu warga memantau proses layanan, sementara pengurus
+              dapat meninjau detail pengajuan, memberi catatan, dan menyiapkan surat selesai.
             </p>
           </div>
         </div>
@@ -634,7 +637,7 @@ export default function StatusPage() {
               {searchQuery
                 ? `Coba kata kunci lain untuk "${searchQuery}".`
                 : isAdmin
-                  ? "Pengajuan warga akan muncul di sini setelah user mengirim form."
+                  ? "Pengajuan warga akan muncul di sini setelah ada formulir yang dikirim."
                   : "Ajukan surat pertama Anda untuk mulai memantau statusnya."}
             </p>
           </div>
@@ -794,7 +797,7 @@ export default function StatusPage() {
                         </>
                       ) : (
                         <span className="text-xs text-slate-400">
-                          Data ini hanya bisa dilihat oleh akun Anda.
+                          Informasi ini hanya ditampilkan untuk akun Anda.
                         </span>
                       )}
                     </div>
@@ -898,7 +901,7 @@ export default function StatusPage() {
               {activeSelectedPengajuan.alasan_penolakan ? (
                 <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3.5">
                   <p className="text-xs font-bold uppercase tracking-wider text-red-500">
-                    Alasan Penolakan
+                    Catatan Perbaikan
                   </p>
                   <p className="mt-1 text-sm leading-relaxed text-red-700">
                     {activeSelectedPengajuan.alasan_penolakan}
@@ -911,16 +914,15 @@ export default function StatusPage() {
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                        Preview Template Surat
+                        Rancangan Surat
                       </p>
                       <p className="mt-1 text-sm text-slate-500">
-                        Template resmi dipakai otomatis saat status diubah ke
-                        selesai.
+                        Format surat ini akan dipakai saat layanan dinyatakan selesai.
                       </p>
                     </div>
                     {recentPdfMessage ? (
                       <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-semibold text-emerald-700">
-                        PDF siap
+                        Siap diunduh
                       </span>
                     ) : null}
                   </div>
@@ -987,10 +989,10 @@ export default function StatusPage() {
           <div className="w-full max-w-lg rounded-[1.8rem] border border-white/80 bg-white shadow-2xl">
             <div className="border-b border-slate-100 px-5 py-4 sm:px-6">
               <h2 className="text-lg font-bold text-slate-900">
-                Tolak Pengajuan
+                Kembalikan untuk Diperbaiki
               </h2>
               <p className="mt-1 text-sm text-slate-500">
-                Isi alasan penolakan untuk {rejectTarget.nama} sebelum status
+                Isi catatan perbaikan untuk {rejectTarget.nama} sebelum status
                 diubah menjadi ditolak.
               </p>
             </div>
@@ -1000,7 +1002,7 @@ export default function StatusPage() {
                 htmlFor="rejectReason"
                 className="mb-2 block text-sm font-semibold text-slate-700"
               >
-                Alasan Penolakan
+                Catatan Perbaikan
               </label>
               <textarea
                 id="rejectReason"
@@ -1008,7 +1010,7 @@ export default function StatusPage() {
                 value={rejectReason}
                 onChange={(event) => setRejectReason(event.target.value)}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-slate-900 outline-none transition focus:border-[var(--color-primary)] focus:bg-white"
-                placeholder="Tulis alasan penolakan agar user bisa memperbaiki pengajuan."
+                placeholder="Tulis catatan yang membantu warga memperbaiki pengajuannya."
               />
             </div>
 

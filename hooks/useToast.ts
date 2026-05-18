@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 
 type ToastType = "success" | "error" | "warning";
 
@@ -13,9 +13,11 @@ type Toast = {
 
 export function useToast() {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const nextToastIdRef = useRef(0);
 
   const showToast = useCallback((type: ToastType, title: string, message: string) => {
-    const id = Date.now();
+    nextToastIdRef.current += 1;
+    const id = nextToastIdRef.current;
     setToasts((prev) => [...prev, { id, type, title, message }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));

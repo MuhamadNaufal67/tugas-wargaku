@@ -3,13 +3,13 @@ import { Card, CardContent } from "@/components/ui/Card";
 const tujuanItems = [
   "Memodernisasi layanan administrasi tingkat RT agar lebih cepat, terdokumentasi, dan mudah dipantau.",
   "Mengurangi proses manual yang rawan antrean, salah catat, dan duplikasi pertanyaan dari warga.",
-  "Menyediakan pengalaman digital yang tetap sederhana untuk user, namun cukup kuat untuk admin.",
+  "Menyediakan pengalaman digital yang tetap sederhana bagi warga, namun tetap memudahkan pengurus dalam melayani.",
 ];
 
 const benefitItems = [
   "Pengajuan surat lebih tertib dari sisi data, status, dan histori perubahan.",
   "Warga memperoleh transparansi progres layanan tanpa harus menunggu kabar manual.",
-  "Pengurus RT memiliki kontrol yang lebih rapi atas status, penolakan, notifikasi, dan penyelesaian surat.",
+  "Pengurus RT memiliki kendali yang lebih rapi atas status layanan, catatan perbaikan, pemberitahuan, dan penyelesaian surat.",
 ];
 
 const values = [
@@ -22,8 +22,8 @@ const values = [
     description: "Setiap perubahan status disertai notifikasi dan jalur tindak lanjut yang mudah dipahami.",
   },
   {
-    title: "Siap Demo",
-    description: "Tampilan dan alur dibuat cukup realistis untuk presentasi, uji manual, dan deploy awal.",
+    title: "Mudah Dipakai",
+    description: "Bahasa, alur, dan tampilan dirancang agar terasa akrab bagi warga dan tetap efisien bagi pengurus.",
   },
 ];
 
@@ -38,9 +38,9 @@ export default function AboutPage() {
           Platform administrasi RT digital yang dirancang agar layanan warga lebih cepat, transparan, dan siap tumbuh.
         </h1>
         <p className="mt-6 max-w-4xl text-base leading-8 text-slate-600 sm:text-lg">
-          WargaKu adalah aplikasi administrasi RT digital yang menyatukan auth, pengajuan surat,
-          pemantauan status, notifikasi, penolakan dengan alasan yang jelas, dan distribusi surat selesai
-          dalam satu pengalaman yang modern namun tetap mudah digunakan.
+          WargaKu menghadirkan pengajuan surat, pemantauan proses, pemberitahuan otomatis,
+          catatan perbaikan yang jelas, dan unduhan surat selesai dalam satu pengalaman yang modern
+          namun tetap mudah digunakan.
         </p>
       </section>
 

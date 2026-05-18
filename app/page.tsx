@@ -20,27 +20,27 @@ const featureCards = [
 ];
 
 const highlightPoints = [
-  "Dashboard modern dengan alur yang mudah dipahami semua warga",
-  "Warna biru-oranye yang ramah, bersih, dan konsisten di seluruh halaman",
-  "Tampilan responsif untuk kebutuhan presentasi company profile",
+  "Alur layanan mudah dipahami oleh warga dan pengurus",
+  "Tampilan bersih, nyaman, dan konsisten di seluruh halaman",
+  "Responsif dan rapi di ponsel, tablet, maupun desktop",
 ];
 
 const workflowSteps = [
   {
-    title: "User register atau login",
-    description: "Warga masuk dengan akun sendiri agar histori pengajuan dan notifikasi tetap personal.",
+    title: "Masuk ke akun",
+    description: "Warga masuk dengan akun sendiri agar riwayat pengajuan dan pemberitahuan tetap tersimpan rapi.",
   },
   {
     title: "Ajukan surat",
-    description: "Form pengajuan menyimpan data penting seperti nama, NIK, alamat, dan jenis surat.",
+    description: "Form pengajuan membantu warga mengirim data penting seperti nama, NIK, alamat, dan jenis surat dengan lengkap.",
   },
   {
-    title: "Admin memproses status",
-    description: "Admin dapat memproses, menolak dengan alasan, atau menyelesaikan pengajuan dari panel kontrol.",
+    title: "Pengurus meninjau layanan",
+    description: "Pengurus dapat memproses, menolak dengan alasan yang jelas, atau menyelesaikan pengajuan dari satu panel kerja.",
   },
   {
-    title: "Surat selesai diunduh",
-    description: "Jika selesai, user menerima notifikasi dan dapat mengunduh PDF surat yang siap cetak.",
+    title: "Surat siap diambil",
+    description: "Saat selesai, warga menerima pemberitahuan dan dapat mengunduh surat PDF yang siap dicetak.",
   },
 ];
 
@@ -78,7 +78,7 @@ export default function HomePage() {
               href="/contact"
               className="rounded-full border border-slate-200 bg-white px-7 py-4 text-base font-bold text-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.05)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] hover:shadow-[0_16px_32px_rgba(15,23,42,0.08)]"
             >
-              Hubungi Kami
+              Butuh Bantuan?
             </Link>
           </div>
 
@@ -101,7 +101,7 @@ export default function HomePage() {
             <div className="rounded-[2rem] bg-[linear-gradient(180deg,_#f7fbff_0%,_#edf5fb_100%)] p-4 sm:p-5 lg:p-6">
               <div className="inline-flex items-center gap-3 rounded-full bg-[var(--color-primary-soft)] px-4 py-3 text-sm font-semibold text-[var(--color-primary)]">
                 <span className="h-2.5 w-2.5 rounded-full bg-[var(--color-accent)]" />
-                Preview Dashboard Aplikasi
+                Sekilas Tampilan Aplikasi
               </div>
 
               <div className="mt-5 overflow-hidden rounded-[1.75rem] border border-slate-200/90 bg-white">
@@ -110,7 +110,7 @@ export default function HomePage() {
                     <div className="overflow-hidden rounded-[1.5rem] border border-white/60 bg-[var(--color-dashboard)] shadow-[0_16px_36px_rgba(45,129,193,0.15)]">
                       <Image
                         src="/HI-FI%20DASHBOARD.png"
-                        alt="Preview dashboard aplikasi WargaKu"
+                        alt="Tampilan dashboard aplikasi WargaKu"
                         width={900}
                         height={960}
                         className="h-auto w-full object-contain"
@@ -146,7 +146,7 @@ export default function HomePage() {
 
           <div className="absolute -bottom-52 right-6 hidden w-[560px] rounded-[2rem] border border-white/85 bg-white/95 p-6 shadow-[0_20px_50px_rgba(15,23,42,0.12)] lg:block">
             <span className="inline-flex rounded-full bg-[#d7f0df] px-4 py-2 text-sm font-semibold text-[#2d8b57]">
-              Nilai Utama
+              Keunggulan Utama
             </span>
             <ul className="mt-4 space-y-3 text-sm leading-relaxed text-slate-600">
               {highlightPoints.map((point) => (
@@ -166,7 +166,7 @@ export default function HomePage() {
             Mengapa WargaKu
           </p>
           <h2 className="text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
-            Fitur singkat yang dibuat untuk kebutuhan administrasi lingkungan.
+            Fitur penting untuk layanan administrasi lingkungan yang lebih tertib.
           </h2>
         </div>
         <div className="grid gap-5 md:grid-cols-3">

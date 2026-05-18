@@ -4,10 +4,25 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 
-export default function AdminAuthButton() {
+type AdminAuthButtonProps = {
+  className?: string;
+  loadingClassName?: string;
+};
+
+export default function AdminAuthButton({
+  className,
+  loadingClassName,
+}: AdminAuthButtonProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { isLoading, profile, signOut, user } = useAuth();
+  const { isLoading, signOut, user } = useAuth();
+
+  const buttonClassName =
+    className ??
+    "inline-flex min-h-10 items-center rounded-full border border-slate-200/80 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]";
+  const pendingClassName =
+    loadingClassName ??
+    "inline-flex min-h-10 items-center rounded-full border border-slate-200/80 bg-white px-4 py-2.5 text-sm font-semibold text-slate-400 shadow-sm";
 
   async function handleLogout() {
     await signOut();
@@ -17,7 +32,7 @@ export default function AdminAuthButton() {
 
   if (isLoading) {
     return (
-      <span className="inline-flex min-h-10 items-center rounded-full border border-slate-200/80 bg-white px-4 py-2.5 text-sm font-semibold text-slate-400 shadow-sm">
+      <span className={pendingClassName}>
         Memuat...
       </span>
     );
@@ -30,9 +45,9 @@ export default function AdminAuthButton() {
     return (
       <Link
         href={`/login${nextPath}`}
-        className="inline-flex min-h-10 items-center rounded-full border border-slate-200/80 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+        className={buttonClassName}
       >
-        Login
+        Masuk
       </Link>
     );
   }
@@ -41,13 +56,9 @@ export default function AdminAuthButton() {
     <button
       type="button"
       onClick={handleLogout}
-      className={`inline-flex min-h-10 items-center rounded-full border bg-white px-4 py-2.5 text-sm font-semibold shadow-sm transition ${
-        profile?.role === "admin"
-          ? "border-red-200 text-red-600 hover:bg-red-50"
-          : "border-slate-200 text-slate-700 hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
-      }`}
+      className={buttonClassName}
     >
-      {profile?.role === "admin" ? "Logout Admin" : "Logout"}
+      Logout
     </button>
   );
 }

@@ -135,7 +135,7 @@ export default function AdminDashboard() {
         <Card>
           <CardContent className="space-y-5">
             <span className="inline-flex rounded-full bg-[var(--color-primary-soft)] px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-primary)]">
-              Dashboard Admin
+              Panel Pengurus
             </span>
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">
@@ -149,7 +149,10 @@ export default function AdminDashboard() {
             <div className="flex flex-wrap gap-3">
               <LinkButton href="/status">Buka Panel Status</LinkButton>
               <LinkButton href="/ajukan-surat" variant="secondary">
-                Lihat Form User
+                Lihat Form Warga
+              </LinkButton>
+              <LinkButton href="/admin/pengumuman" variant="ghost">
+                Kelola Pengumuman
               </LinkButton>
             </div>
           </CardContent>
@@ -158,17 +161,20 @@ export default function AdminDashboard() {
         <Card>
           <CardContent className="space-y-4">
             <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-400">
-              Quick Actions
+              Aksi Cepat
             </p>
             <div className="grid gap-3">
               <LinkButton href="/status" variant="secondary">
-                Review Pengajuan Terbaru
+                Tinjau Pengajuan Terbaru
+              </LinkButton>
+              <LinkButton href="/admin/pengumuman" variant="secondary">
+                Tulis Pengumuman Warga
               </LinkButton>
               <LinkButton href="/status" variant="warning">
-                Tangani Penolakan
+                Periksa Pengajuan Ditolak
               </LinkButton>
               <LinkButton href="/status" variant="success">
-                Finalisasi Surat Selesai
+                Siapkan Surat Selesai
               </LinkButton>
             </div>
           </CardContent>
@@ -276,7 +282,7 @@ export default function AdminDashboard() {
           <CardContent className="space-y-4">
             <div>
               <h2 className="text-xl font-bold text-slate-950">
-                Recent Activity
+                Aktivitas Terbaru
               </h2>
               <p className="text-sm text-slate-500">
                 Aktivitas notifikasi terbaru yang tercatat di sistem.

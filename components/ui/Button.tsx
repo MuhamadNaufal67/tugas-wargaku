@@ -41,7 +41,7 @@ const variantClassNames: Record<ButtonVariant, string> = {
 };
 
 function getButtonClassName(variant: ButtonVariant, className?: string) {
-  return `inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/30 disabled:cursor-not-allowed disabled:opacity-60 ${variantClassNames[variant]} ${
+  return `inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-[color,background-color,border-color,transform,box-shadow] duration-200 ease-out hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 ${variantClassNames[variant]} ${
     className ?? ""
   }`.trim();
 }

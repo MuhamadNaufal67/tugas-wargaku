@@ -12,8 +12,8 @@ export function EmptyState({
   title: string;
 }) {
   return (
-    <div className="rounded-[1.6rem] border border-slate-200 bg-white px-5 py-10 text-center shadow-sm">
-      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--color-primary-soft)] text-[var(--color-primary)]">
+    <div className="rounded-[1.6rem] border border-slate-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.98))] px-5 py-10 text-center shadow-[var(--shadow-card)]">
+      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] shadow-sm">
         {icon ?? (
           <svg
             viewBox="0 0 24 24"

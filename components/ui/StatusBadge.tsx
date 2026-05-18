@@ -22,7 +22,7 @@ export function StatusBadge({ status }: { status: string }) {
 
   return (
     <span
-      className={`inline-flex rounded-full border px-3 py-1 text-xs font-bold capitalize ${className}`}
+      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold capitalize shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] ${className}`}
     >
       {status}
     </span>

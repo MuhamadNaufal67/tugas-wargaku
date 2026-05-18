@@ -7,11 +7,11 @@ import { ToastContainer } from "@/components/Toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { upsertCurrentUserProfile } from "@/lib/authProfile";
+import { NIK_LENGTH, sanitizeNikValue } from "@/lib/nik";
 import {
+  createAuthDebugPayload,
   formatSupabaseError,
-  getSupabaseActionableMessage,
-  getAuthErrorDebugInfo,
-  getAuthErrorUiDetails,
+  normalizeAuthError,
   logAuthError,
 } from "@/lib/supabaseAuthErrors";
 
@@ -76,7 +76,7 @@ export default function LoginPage() {
   const [formData, setFormData] = useState<FormState>(initialFormState);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [errorMessage, setErrorMessage] = useState("");
-  const [errorDebugDetails, setErrorDebugDetails] = useState("");
+  const [errorHelperText, setErrorHelperText] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toasts, showToast, dismiss } = useToast();
@@ -90,15 +90,20 @@ export default function LoginPage() {
   }, [isAuthenticated, isLoading, redirectPath, router, user]);
 
   function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
+    const nextValue =
+      key === "nik"
+        ? (sanitizeNikValue(String(value)) as FormState[K])
+        : value;
+
     setFormData((current) => ({
       ...current,
-      [key]: value,
+      [key]: nextValue,
     }));
   }
 
   function resetMessages() {
     setErrorMessage("");
-    setErrorDebugDetails("");
+    setErrorHelperText("");
     setSuccessMessage("");
   }
 
@@ -161,7 +166,6 @@ export default function LoginPage() {
         const { error } = response;
 
         if (error) {
-          logAuthError("signInWithPassword failed", error, response);
           throw error;
         }
 
@@ -192,7 +196,7 @@ export default function LoginPage() {
       }
 
       if (!data.user) {
-        throw new Error("Supabase tidak mengembalikan data user setelah signup.");
+        throw new Error("Pendaftaran belum dapat diselesaikan. Silakan coba beberapa saat lagi.");
       }
 
       if (data.session) {
@@ -212,14 +216,14 @@ export default function LoginPage() {
         await refreshProfile();
         document.cookie =
           "isLoggedIn=true; path=/; max-age=604800; samesite=lax";
-        showToast("success", "Register berhasil", "Akun dan profil berhasil dibuat.");
+        showToast("success", "Pendaftaran berhasil", "Akun dan data warga berhasil dibuat.");
         router.replace(redirectPath === "/status" ? "/ajukan-surat" : redirectPath);
         router.refresh();
         return;
       }
 
       const confirmationMessage =
-        "Akun auth berhasil dibuat. Jika email confirmation aktif di Supabase, verifikasi email Anda lalu login. Profil akan dibuat saat sesi pertama aktif, atau otomatis jika trigger profiles sudah dipasang.";
+        "Akun berhasil dibuat. Jika verifikasi email diaktifkan, silakan cek email Anda terlebih dahulu sebelum masuk.";
       if (process.env.NODE_ENV !== "production") {
         console.info("Signup succeeded without session", {
           emailConfirmedAt: data.user.email_confirmed_at,
@@ -228,7 +232,7 @@ export default function LoginPage() {
         });
       }
       setSuccessMessage(confirmationMessage);
-      showToast("success", "Register berhasil", confirmationMessage);
+      showToast("success", "Pendaftaran berhasil", confirmationMessage);
       setMode("login");
       setFormData((current) => ({
         ...initialFormState,
@@ -236,22 +240,36 @@ export default function LoginPage() {
       }));
       setFieldErrors({});
     } catch (error) {
-      logAuthError("handleSubmit auth failed", error, {
-        mode,
-        redirectPath,
-      });
-      const info = getAuthErrorDebugInfo(error);
-      const message =
-        getSupabaseActionableMessage(error) ??
-        info.message ??
-        "Unknown auth error";
-      setErrorMessage(message);
-      setErrorDebugDetails(
-        process.env.NODE_ENV === "production"
-          ? ""
-          : getAuthErrorUiDetails(error),
-      );
-      showToast("error", "Autentikasi gagal", message);
+      if (mode === "login") {
+        if (process.env.NODE_ENV !== "production") {
+          console.log(
+            "LOGIN ERROR:",
+            JSON.stringify(
+              createAuthDebugPayload("handleSubmit login failed", error, {
+                redirectPath,
+                responseMode: mode,
+              }),
+              null,
+              2,
+            ),
+          );
+        }
+      } else {
+        logAuthError("handleSubmit auth failed", error, {
+          mode,
+          redirectPath,
+        });
+      }
+      const normalizedError =
+        mode === "login"
+          ? normalizeAuthError(error)
+          : {
+              helperText: "",
+              message: "Autentikasi belum dapat diproses. Silakan coba kembali.",
+            };
+      setErrorMessage(normalizedError.message);
+      setErrorHelperText(normalizedError.helperText);
+      showToast("error", "Belum berhasil masuk", normalizedError.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -273,20 +291,20 @@ export default function LoginPage() {
             Akun WargaKu
           </span>
           <h1 className="mt-5 max-w-xl text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">
-            Login dan pengajuan surat kini memakai akun user/admin yang nyata.
+            Akses akun warga dan pengurus yang aman dalam satu aplikasi layanan.
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
-            Warga dapat melihat pengajuan miliknya sendiri, menerima notifikasi,
-            mengunduh surat yang selesai, dan mengajukan ulang jika ditolak.
-            Admin mengelola seluruh proses dari dashboard status yang sama.
+            Warga dapat melihat pengajuan miliknya sendiri, menerima pemberitahuan,
+            mengunduh surat yang selesai, dan mengajukan ulang jika diperlukan.
+            Pengurus mengelola seluruh proses layanan dari panel yang sama.
           </p>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
             {[
-              "Supabase Auth untuk login/register",
-              "Role user/admin dari tabel profiles",
-              "Status pengajuan personal dan aman",
-              "Siap untuk notifikasi dan download surat",
+              "Akses akun warga dan pengurus yang aman",
+              "Hak akses warga dan pengurus terkelola dengan baik",
+              "Riwayat pengajuan tersimpan rapi dan pribadi",
+              "Pemberitahuan otomatis dan unduhan surat PDF",
             ].map((item) => (
               <div
                 key={item}
@@ -309,7 +327,7 @@ export default function LoginPage() {
                   : "text-slate-500"
               }`}
             >
-              Login
+              Masuk
             </button>
             <button
               type="button"
@@ -320,7 +338,7 @@ export default function LoginPage() {
                   : "text-slate-500"
               }`}
             >
-              Register
+              Daftar
             </button>
           </div>
 
@@ -330,8 +348,8 @@ export default function LoginPage() {
             </h2>
             <p className="mt-2 text-sm leading-7 text-slate-500">
               {mode === "login"
-                ? "Gunakan email dan password Supabase Anda untuk melanjutkan."
-                : "Registrasi user baru akan otomatis mendapat role user. Role admin diatur dari database."}
+                ? "Gunakan email dan kata sandi Anda untuk melanjutkan."
+                : "Daftarkan akun warga untuk mulai mengajukan surat dan memantau proses layanan."}
             </p>
           </div>
 
@@ -378,10 +396,17 @@ export default function LoginPage() {
                     onChange={(event) => updateField("nik", event.target.value)}
                     className={getInputClassName(Boolean(fieldErrors.nik))}
                     placeholder="16 digit NIK"
+                    maxLength={NIK_LENGTH}
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                   />
                   {fieldErrors.nik ? (
                     <p className="mt-2 text-xs font-medium text-red-600">
                       {fieldErrors.nik}
+                    </p>
+                  ) : formData.nik.length > 0 && formData.nik.length < NIK_LENGTH ? (
+                    <p className="mt-2 text-xs font-medium text-amber-600">
+                      NIK harus terdiri dari {NIK_LENGTH} digit.
                     </p>
                   ) : null}
                 </div>
@@ -493,10 +518,10 @@ export default function LoginPage() {
             {errorMessage ? (
               <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
                 <p>{errorMessage}</p>
-                {process.env.NODE_ENV !== "production" && errorDebugDetails ? (
-                  <pre className="mt-3 overflow-x-auto rounded-xl bg-red-100/80 p-3 text-xs leading-6 text-red-700">
-                    {errorDebugDetails}
-                  </pre>
+                {errorHelperText ? (
+                  <p className="mt-1 text-xs font-medium text-red-500">
+                    {errorHelperText}
+                  </p>
                 ) : null}
               </div>
             ) : null}
@@ -515,8 +540,8 @@ export default function LoginPage() {
               {isSubmitting
                 ? "Memproses..."
                 : mode === "login"
-                  ? "Login"
-                  : "Buat Akun"}
+                  ? "Masuk"
+                  : "Daftarkan Akun"}
             </button>
           </form>
         </div>

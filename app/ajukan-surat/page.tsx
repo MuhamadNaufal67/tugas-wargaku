@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { upsertCurrentUserProfile } from "@/lib/authProfile";
 import { createNotification } from "@/lib/notifications";
+import { NIK_LENGTH, getNikValidationMessage, sanitizeNikValue } from "@/lib/nik";
 import {
   formatSupabaseError,
   getSupabaseActionableMessage,
@@ -66,10 +67,7 @@ function validateField(name: keyof FormErrors, value: string) {
   }
 
   if (name === "nik") {
-    if (!trimmedValue) return "NIK wajib diisi.";
-    if (!/^\d+$/.test(trimmedValue)) return "NIK hanya boleh berisi angka.";
-    if (trimmedValue.length !== 16) return "NIK harus terdiri dari 16 digit.";
-    return "";
+    return getNikValidationMessage(trimmedValue);
   }
 
   if (name === "alamat") {
@@ -176,10 +174,12 @@ function AjukanSuratForm({ profile }: { profile: ProfileRow | null }) {
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) {
     const { name, value } = event.target;
+    const nextValue =
+      name === "nik" ? sanitizeNikValue(value) : value;
 
     setFormData((current) => ({
       ...current,
-      [name]: value,
+      [name]: nextValue,
     }));
 
     if (
@@ -188,7 +188,7 @@ function AjukanSuratForm({ profile }: { profile: ProfileRow | null }) {
       name === "alamat" ||
       name === "jenis_surat"
     ) {
-      const error = validateField(name as keyof FormErrors, value);
+      const error = validateField(name as keyof FormErrors, nextValue);
       setFieldErrors((current) => ({
         ...current,
         [name]: error || undefined,
@@ -301,8 +301,8 @@ function AjukanSuratForm({ profile }: { profile: ProfileRow | null }) {
         await createNotification({
           message:
             reapplySourceId
-              ? "Pengajuan ulang berhasil dikirim dan menunggu proses admin."
-              : "Pengajuan surat berhasil dikirim dan menunggu proses admin.",
+              ? "Pengajuan ulang berhasil dikirim dan menunggu peninjauan pengurus."
+              : "Pengajuan surat berhasil dikirim dan menunggu peninjauan pengurus.",
           metadata: {
             jenis_surat: formData.jenis_surat,
             pengajuan_id: insertedPengajuan.id,
@@ -319,7 +319,7 @@ function AjukanSuratForm({ profile }: { profile: ProfileRow | null }) {
         showToast(
           "warning",
           "Pengajuan tersimpan",
-          "Pengajuan berhasil dikirim, tetapi notifikasi gagal disimpan.",
+          `Pengajuan berhasil dikirim, tetapi pemberitahuan belum dapat disiapkan. ${formatSupabaseError(notificationError)}`,
         );
       }
 
@@ -357,8 +357,8 @@ function AjukanSuratForm({ profile }: { profile: ProfileRow | null }) {
             Ajukan surat secara digital dengan akun warga Anda.
           </h1>
           <p className="mt-4 text-base leading-8 text-slate-600 sm:text-lg">
-            Data akun akan digunakan sebagai dasar pengajuan, lalu sistem
-            WargaKu menyimpan permohonan Anda dengan role user yang aman.
+            Data akun Anda membantu mempercepat pengisian formulir dan menjaga
+            proses pengajuan tetap rapi, aman, dan mudah ditelusuri.
           </p>
         </div>
 
@@ -411,10 +411,17 @@ function AjukanSuratForm({ profile }: { profile: ProfileRow | null }) {
                 className={getInputClassName(Boolean(fieldErrors.nik))}
                 placeholder="Masukkan NIK"
                 aria-invalid={Boolean(fieldErrors.nik)}
+                maxLength={NIK_LENGTH}
+                inputMode="numeric"
+                pattern="[0-9]*"
               />
               {fieldErrors.nik ? (
                 <p className="mt-2 text-xs font-medium text-red-600">
                   {fieldErrors.nik}
+                </p>
+              ) : formData.nik.length > 0 && formData.nik.length < NIK_LENGTH ? (
+                <p className="mt-2 text-xs font-medium text-amber-600">
+                  NIK harus terdiri dari {NIK_LENGTH} digit.
                 </p>
               ) : null}
             </div>
@@ -490,8 +497,7 @@ function AjukanSuratForm({ profile }: { profile: ProfileRow | null }) {
                 className="block w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-[var(--color-primary-soft)] file:px-4 file:py-2 file:font-semibold file:text-[var(--color-primary)] hover:file:bg-[#d8ebfb]"
               />
               <p className="mt-2 text-xs text-slate-500">
-                Saat ini file disimpan sebagai nama dokumen. Implementasi bisa
-                ditingkatkan ke Supabase Storage di tahap berikutnya.
+                Lampiran membantu pengurus memeriksa kebutuhan pengajuan dengan lebih cepat.
               </p>
             </div>
           </div>
@@ -572,14 +578,13 @@ export default function AjukanSuratPage() {
       <section className="flex flex-1 items-center justify-center">
         <div className="w-full max-w-2xl rounded-[2rem] border border-amber-200 bg-white p-8 shadow-sm">
           <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-amber-700">
-            Akses User
+            Akses Warga
           </span>
           <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-950">
-            Halaman pengajuan surat khusus untuk user.
+            Halaman ini ditujukan untuk akun warga.
           </h1>
           <p className="mt-3 text-sm leading-7 text-slate-600">
-            Anda login sebagai admin. Untuk memproses pengajuan warga, gunakan
-            halaman status pengajuan.
+            Anda sedang masuk sebagai pengurus. Untuk meninjau atau memperbarui layanan warga, gunakan halaman status pengajuan.
           </p>
           <button
             type="button"

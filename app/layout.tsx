@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 export const metadata: Metadata = {
   title: "WargaKu | Administrasi RT Digital",
   description:
-    "Company profile WargaKu, aplikasi administrasi RT digital untuk surat, status pengajuan, dan pengumuman warga.",
+    "WargaKu adalah aplikasi administrasi RT digital untuk pengajuan surat, pemantauan status, dan informasi warga.",
 };
 
 export default function RootLayout({
@@ -15,7 +15,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" className="antialiased">
+    <html
+      lang="id"
+      className="antialiased"
+      data-scroll-behavior="smooth"
+    >
       <body className="min-h-screen bg-[var(--color-surface)] text-slate-900">
         <AuthProvider>
           <div className="relative flex min-h-screen flex-col">
@@ -31,11 +35,11 @@ export default function RootLayout({
               <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-8 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
                 <div>
                   <p className="text-base font-bold text-slate-900">
-                    WargaKu untuk administrasi RT yang lebih tertata.
+                    WargaKu untuk layanan warga yang lebih tertata.
                   </p>
                   <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-slate-500">
-                    Solusi digital untuk pengajuan surat, pemantauan status, dan
-                    distribusi informasi warga dalam satu platform.
+                    Pengajuan surat, pemantauan proses, dan informasi lingkungan
+                    tersedia dalam satu aplikasi yang ringkas dan mudah dipakai.
                   </p>
                 </div>
 

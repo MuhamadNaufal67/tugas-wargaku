@@ -13,6 +13,33 @@ export type AppRole = "admin" | "user";
 export type Database = {
   public: {
     Tables: {
+      announcements: {
+        Row: {
+          category: string;
+          content: string;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          title: string;
+        };
+        Insert: {
+          category: string;
+          content: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          title: string;
+        };
+        Update: {
+          category?: string;
+          content?: string;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          title?: string;
+        };
+        Relationships: [];
+      };
       notifications: {
         Row: {
           created_at: string | null;
@@ -139,6 +166,8 @@ export type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 export type NotificationRow =
   Database["public"]["Tables"]["notifications"]["Row"];
 export type PengajuanRow = Database["public"]["Tables"]["pengajuan_surat"]["Row"];
+export type AnnouncementRow =
+  Database["public"]["Tables"]["announcements"]["Row"];
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

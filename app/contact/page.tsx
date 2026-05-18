@@ -8,37 +8,37 @@ import { Card, CardContent } from "@/components/ui/Card";
 
 const infoCards = [
   {
-    title: "Email Tim",
+    title: "Email Layanan",
     value: "halo@wargaku.id",
-    detail: "Untuk demo, kolaborasi, atau pertanyaan teknis.",
+    detail: "Untuk bantuan penggunaan aplikasi dan pertanyaan layanan warga.",
   },
   {
-    title: "Jam Respons",
+    title: "Jam Pelayanan",
     value: "08.00 - 17.00 WIB",
-    detail: "Balasan prioritas untuk kebutuhan presentasi dan deploy.",
+    detail: "Waktu layanan utama untuk membantu pengajuan dan kebutuhan administrasi warga.",
   },
   {
-    title: "Kanal RT",
+    title: "Kontak Pengurus",
     value: "WhatsApp / Email",
-    detail: "Cocok untuk komunikasi cepat dengan pengurus lingkungan.",
+    detail: "Saluran yang memudahkan warga menghubungi pengurus lingkungan.",
   },
 ];
 
 const faqs = [
   {
-    question: "Apakah WargaKu bisa dipakai untuk demo RT sungguhan?",
+    question: "Bagaimana jika saya butuh bantuan saat mengajukan surat?",
     answer:
-      "Bisa. Alur auth, pengajuan surat, status, penolakan, notifikasi, dan download surat sudah disusun untuk presentasi end-to-end.",
+      "Silakan hubungi pengurus atau petugas layanan melalui kontak yang tersedia. Tim akan membantu memeriksa data dan langkah yang perlu dilakukan.",
   },
   {
-    question: "Apakah admin dan user punya dashboard berbeda?",
+    question: "Apakah saya bisa memantau perkembangan pengajuan dari aplikasi?",
     answer:
-      "Ya. Admin mengelola seluruh pengajuan dan aktivitas terbaru, sedangkan user fokus pada riwayat pengajuan, notifikasi, dan unduhan suratnya sendiri.",
+      "Bisa. Setiap pengajuan memiliki status yang dapat dipantau, sehingga warga mengetahui apakah layanan sedang diperiksa, perlu perbaikan, atau sudah selesai.",
   },
   {
-    question: "Bagaimana jika ingin lanjut ke production deployment?",
+    question: "Bagaimana jika data pengajuan saya perlu diperbaiki?",
     answer:
-      "Langkah berikutnya adalah mengunci policy Supabase, menyiapkan domain, dan jika perlu memindahkan PDF ke Supabase Storage.",
+      "Jika pengajuan perlu diperbaiki, Anda akan menerima pemberitahuan beserta catatan yang membantu Anda melengkapi data sebelum mengajukan ulang.",
   },
 ];
 
@@ -78,7 +78,7 @@ export default function ContactPage() {
     showToast(
       "success",
       "Pesan siap dikirim",
-      "Aplikasi email Anda akan terbuka untuk mengirim pesan ke tim WargaKu.",
+      "Aplikasi email Anda akan terbuka untuk menghubungi pengurus atau petugas layanan.",
     );
     setFormData({
       email: "",
@@ -94,23 +94,23 @@ export default function ContactPage() {
         <Card className="overflow-hidden bg-[linear-gradient(160deg,_#1f6ba5_0%,_#2d81c1_55%,_#69addf_100%)] text-white shadow-[0_20px_70px_rgba(31,107,165,0.24)]">
           <CardContent className="space-y-5">
             <span className="inline-flex rounded-full bg-white/16 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/84">
-              Contact
+              Bantuan Layanan
             </span>
             <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
-              Hubungi tim WargaKu untuk demo, review, atau implementasi lanjutan.
+              Butuh bantuan administrasi atau informasi layanan warga?
             </h1>
             <p className="max-w-xl text-base leading-8 text-white/82 sm:text-lg">
-              Gunakan form di samping jika Anda ingin mendiskusikan kebutuhan
-              presentasi, deployment, atau adaptasi aplikasi ini untuk skenario RT/RW sungguhan.
+              Gunakan form di samping untuk menghubungi pengurus atau petugas layanan terkait
+              pengajuan surat, informasi warga, atau bantuan penggunaan aplikasi.
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent>
-            <h2 className="text-2xl font-bold text-slate-900">Form Pesan</h2>
+            <h2 className="text-2xl font-bold text-slate-900">Kirim Pesan</h2>
             <p className="mt-2 text-sm leading-7 text-slate-500">
-              Pesan akan diarahkan ke aplikasi email default Anda agar bisa langsung dikirim.
+              Pesan akan diarahkan ke aplikasi email Anda agar dapat langsung dikirim.
             </p>
             <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
               <div>

@@ -13,11 +13,11 @@ type ServiceItem = {
 const serviceImages: Record<number, { src: string; alt: string }> = {
   1: {
     src: "/HI-FI%20Ajukan%20Surat%201.png",
-    alt: "Preview fitur Ajukan Surat",
+    alt: "Tampilan fitur Ajukan Surat",
   },
   2: {
     src: "/HI-FI%20Status%20Pengajuan%20Surat.png",
-    alt: "Preview fitur Status Pengajuan",
+    alt: "Tampilan fitur Status Pengajuan",
   },
 };
 
@@ -53,16 +53,16 @@ export default async function ServicesPage() {
           Layanan Utama
         </span>
         <h1 className="mt-5 max-w-4xl text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">
-          Fitur inti WargaKu untuk kebutuhan administrasi RT digital yang benar-benar bisa dijalankan.
+          Layanan inti WargaKu untuk membantu administrasi RT/RW berjalan lebih cepat dan tertata.
         </h1>
         <p className="mt-6 max-w-3xl text-base leading-8 text-slate-600 sm:text-lg">
-          Setiap layanan dirancang sebagai bagian dari alur kerja utuh: mulai dari auth,
-          pengajuan, status, notifikasi, penolakan dengan alasan, hingga surat selesai yang siap diunduh.
+          Setiap layanan dirancang sebagai satu alur yang utuh, mulai dari pengajuan,
+          pemantauan proses, pemberitahuan otomatis, catatan perbaikan, hingga surat selesai yang siap diunduh.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <LinkButton href="/dashboard">Dashboard User</LinkButton>
+          <LinkButton href="/dashboard">Lihat Akun Warga</LinkButton>
           <LinkButton href="/admin" variant="secondary">
-            Dashboard Admin
+            Lihat Panel Pengurus
           </LinkButton>
         </div>
       </section>
@@ -76,7 +76,7 @@ export default async function ServicesPage() {
                   0{index + 1}
                 </span>
                 <span className="rounded-full bg-[#fff2e8] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-[var(--color-accent)]">
-                  Service
+                  Layanan
                 </span>
               </div>
               <h2 className="mt-6 text-2xl font-bold text-slate-900">{service.title}</h2>

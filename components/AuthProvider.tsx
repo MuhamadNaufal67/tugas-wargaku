@@ -21,6 +21,7 @@ import {
 } from "@/lib/authProfile";
 import {
   getSupabaseActionableMessage,
+  isInvalidRefreshTokenError,
   isProfilesForeignKeyError,
   isSupabaseFetchError,
   logAuthError,
@@ -51,6 +52,30 @@ function writeAuthCookies(isAuthenticated: boolean, role?: AppRole | null) {
 
   document.cookie = "isLoggedIn=true; path=/; max-age=604800; samesite=lax";
   document.cookie = `userRole=${role ?? "user"}; path=/; max-age=604800; samesite=lax`;
+}
+
+function clearPersistedSupabaseSession() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const matchingStorageKey = /^sb-.*-auth-token$/i;
+
+  for (const storage of [window.localStorage, window.sessionStorage]) {
+    const keysToRemove: string[] = [];
+
+    for (let index = 0; index < storage.length; index += 1) {
+      const key = storage.key(index);
+
+      if (key && matchingStorageKey.test(key)) {
+        keysToRemove.push(key);
+      }
+    }
+
+    for (const key of keysToRemove) {
+      storage.removeItem(key);
+    }
+  }
 }
 
 async function ensureProfile(user: User, options?: { logErrors?: boolean }) {
@@ -87,6 +112,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const activeSyncIdRef = useRef(0);
+  const isCleaningSessionRef = useRef(false);
   const reportedAuthIssuesRef = useRef<Set<string>>(new Set());
   const userRef = useRef<User | null>(null);
 
@@ -94,12 +121,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     userRef.current = user;
   }, [user]);
 
-  function reportAuthIssueOnce(
+  const reportAuthIssueOnce = useCallback((
     label: string,
     error: unknown,
     response?: unknown,
     severity: "error" | "warning" = "error",
-  ) {
+  ) => {
     const message = getSupabaseActionableMessage(error) ?? "Unknown auth error";
     const key = `${label}:${message}`;
 
@@ -114,30 +141,105 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     logAuthError(label, error, response);
-  }
+  }, []);
 
-  const syncSession = useCallback(async (nextSession?: Session | null) => {
-    setIsLoading(true);
+  const clearAuthState = useCallback(() => {
+    setSession(null);
+    setUser(null);
+    setProfile(null);
+    writeAuthCookies(false);
+  }, []);
+
+  const cleanupInvalidSession = useCallback(async (
+    label: string,
+    error: unknown,
+    response?: unknown,
+  ) => {
+    reportAuthIssueOnce(label, error, response, "warning");
+    clearAuthState();
+    clearPersistedSupabaseSession();
+
+    if (isCleaningSessionRef.current) {
+      return;
+    }
+
+    isCleaningSessionRef.current = true;
+
+    try {
+      const signOutResponse = await supabase.auth.signOut({ scope: "local" });
+
+      if (
+        signOutResponse.error &&
+        !isInvalidRefreshTokenError(signOutResponse.error)
+      ) {
+        reportAuthIssueOnce(
+          "cleanupInvalidSession local signOut failed",
+          signOutResponse.error,
+          signOutResponse,
+          "warning",
+        );
+      }
+    } catch (signOutError) {
+      if (!isInvalidRefreshTokenError(signOutError)) {
+        reportAuthIssueOnce(
+          "cleanupInvalidSession local signOut threw",
+          signOutError,
+          null,
+          "warning",
+        );
+      }
+    } finally {
+      isCleaningSessionRef.current = false;
+    }
+  }, [clearAuthState, reportAuthIssueOnce, supabase]);
+
+  const syncSession = useCallback(async (
+    nextSession?: Session | null,
+    options?: { showLoading?: boolean },
+  ) => {
+    const syncId = activeSyncIdRef.current + 1;
+    activeSyncIdRef.current = syncId;
+    const shouldShowLoading = options?.showLoading ?? true;
+    const isStaleSync = () => syncId !== activeSyncIdRef.current;
+
+    if (shouldShowLoading) {
+      setIsLoading(true);
+    }
 
     try {
       const sessionToUse =
         nextSession ?? (await supabase.auth.getSession()).data.session ?? null;
       const nextUser = sessionToUse?.user ?? null;
 
+      if (isStaleSync()) {
+        return;
+      }
+
       setSession(sessionToUse);
       setUser(nextUser);
 
       if (!nextUser) {
-        setProfile(null);
-        writeAuthCookies(false);
+        clearAuthState();
         return;
       }
 
       try {
         const nextProfile = await ensureProfile(nextUser, { logErrors: false });
+
+        if (isStaleSync()) {
+          return;
+        }
+
         setProfile(nextProfile);
         writeAuthCookies(true, nextProfile.role);
       } catch (error) {
+        if (isInvalidRefreshTokenError(error)) {
+          await cleanupInvalidSession("profile bootstrap invalid refresh token", error, {
+            sessionUserId: nextUser.id,
+          });
+          return;
+        }
+
         if (isProfilesForeignKeyError(error) || isSupabaseFetchError(error)) {
           reportAuthIssueOnce("profile bootstrap fallback", error, {
             sessionUserId: nextUser.id,
@@ -145,6 +247,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const fallbackProfile = buildFallbackProfileRow(nextUser, {
             role: "user",
           });
+
+          if (isStaleSync()) {
+            return;
+          }
+
           setProfile(fallbackProfile);
           writeAuthCookies(true, fallbackProfile.role);
           return;
@@ -153,11 +260,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw error;
       }
     } catch (error) {
+      if (isInvalidRefreshTokenError(error)) {
+        await cleanupInvalidSession("syncSession invalid refresh token", error, {
+          hasIncomingSession: Boolean(nextSession),
+        });
+        return;
+      }
+
       reportAuthIssueOnce("syncSession failed", error, {
         hasIncomingSession: Boolean(nextSession),
         incomingSessionUserId: nextSession?.user?.id ?? null,
         resolvedUserId: nextSession?.user?.id ?? userRef.current?.id ?? null,
       });
+
+      if (isStaleSync()) {
+        return;
+      }
+
       setProfile(null);
       if (nextSession?.user ?? userRef.current) {
         writeAuthCookies(true);
@@ -165,9 +284,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         writeAuthCookies(false);
       }
     } finally {
-      setIsLoading(false);
+      if (!isStaleSync()) {
+        setIsLoading(false);
+      }
     }
-  }, [supabase]);
+  }, [clearAuthState, cleanupInvalidSession, reportAuthIssueOnce, supabase]);
 
   async function refreshProfile() {
     if (!user) {
@@ -180,6 +301,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setProfile(data);
       writeAuthCookies(true, data.role);
     } catch (error) {
+      if (isInvalidRefreshTokenError(error)) {
+        await cleanupInvalidSession("refreshProfile invalid refresh token", error, {
+          userId: user.id,
+        });
+        return;
+      }
+
       if (isProfilesForeignKeyError(error) || isSupabaseFetchError(error)) {
         reportAuthIssueOnce("refreshProfile fallback", error, {
           userId: user.id,
@@ -197,11 +325,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signOut() {
-    writeAuthCookies(false);
-    await supabase.auth.signOut();
-    setSession(null);
-    setUser(null);
-    setProfile(null);
+    clearAuthState();
+
+    try {
+      const response = await supabase.auth.signOut();
+
+      if (response.error) {
+        if (isInvalidRefreshTokenError(response.error)) {
+          reportAuthIssueOnce("signOut invalid refresh token", response.error, response, "warning");
+          return;
+        }
+
+        reportAuthIssueOnce("signOut failed", response.error, response);
+      }
+    } catch (error) {
+      if (isInvalidRefreshTokenError(error)) {
+        reportAuthIssueOnce("signOut invalid refresh token", error, null, "warning");
+        return;
+      }
+
+      reportAuthIssueOnce("signOut threw", error);
+    } finally {
+      clearPersistedSupabaseSession();
+    }
   }
 
   useEffect(() => {
@@ -212,15 +358,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      await syncSession();
+      await syncSession(undefined, { showLoading: true });
     }
 
     void initialize();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      void syncSession(nextSession);
+    } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      const showLoading = event === "INITIAL_SESSION" || event === "SIGNED_IN";
+
+      void syncSession(nextSession, { showLoading });
     });
 
     return () => {
@@ -228,6 +376,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       subscription.unsubscribe();
     };
   }, [supabase, syncSession]);
+
+  useEffect(() => {
+    function handleUnhandledRejection(event: PromiseRejectionEvent) {
+      if (!isInvalidRefreshTokenError(event.reason)) {
+        return;
+      }
+
+      event.preventDefault();
+      void cleanupInvalidSession("unhandled invalid refresh token", event.reason, {
+        source: "window.unhandledrejection",
+      });
+    }
+
+    window.addEventListener("unhandledrejection", handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener("unhandledrejection", handleUnhandledRejection);
+    };
+  }, [cleanupInvalidSession]);
 
   return (
     <AuthContext.Provider
