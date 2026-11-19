@@ -2,10 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { ToastContainer } from "@/components/Toast";
-import { LinkButton } from "@/components/ui/Button";
-import { Card, CardContent } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
@@ -155,186 +152,125 @@ export default function PengumumanPage() {
 
   if (isAuthLoading || (!isAuthenticated && typeof window !== "undefined")) {
     return (
-      <div className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-        <div className="h-80 animate-pulse rounded-[1.7rem] border border-white/80 bg-white/95 shadow-sm" />
-        <div className="h-80 animate-pulse rounded-[1.7rem] border border-white/80 bg-white/95 shadow-sm" />
+      <div aria-busy="true" aria-label="Memuat pengumuman" className="animate-pulse space-y-6">
+        <div className="h-8 w-48 rounded-md bg-slate-200" />
+        <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="h-80 rounded-xl border border-[var(--color-line)] bg-white" />
+          <div className="h-80 rounded-xl border border-[var(--color-line)] bg-white" />
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-        <Card>
-          <CardContent className="space-y-5">
-            <span className="inline-flex rounded-full bg-[var(--color-primary-soft)] px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-primary)]">
-              Pengumuman Warga
-            </span>
-            <div>
-              <h1 className="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">
-                Informasi lingkungan terbaru, langsung dari pengurus.
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500 sm:text-base">
-                Gunakan halaman ini untuk melihat pengumuman terbaru, agenda
-                lingkungan, dan informasi layanan yang perlu Anda ketahui.
+      <header>
+        <h1 className="page-title">Pengumuman RT</h1>
+        <p className="page-lead">
+          Informasi dari pengurus, seperti jadwal kegiatan dan pemberitahuan
+          penting. Pengumuman baru juga dikirim ke notifikasi Anda.
+        </p>
+      </header>
+
+      <div className="grid items-start gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+        <article
+          aria-labelledby="announcement-detail-title"
+          className="rounded-xl border border-[var(--color-line)] bg-white p-5 sm:p-7 lg:order-2"
+        >
+          {isDetailLoading ? (
+            <div aria-busy="true" className="animate-pulse space-y-3">
+              <div className="h-4 w-32 rounded bg-slate-200" />
+              <div className="h-7 w-3/4 rounded bg-slate-200" />
+              <div className="h-40 rounded bg-slate-100" />
+            </div>
+          ) : selectedCard ? (
+            <>
+              <p className="text-sm text-slate-500">
+                <span className="font-semibold text-[var(--color-primary)]">
+                  {formatAnnouncementCategory(selectedCard.category)}
+                </span>{" "}
+                &middot; {formatAnnouncementDate(selectedCard.created_at)}
               </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <LinkButton href="/dashboard">Kembali ke Dashboard</LinkButton>
-              <LinkButton href="/status" variant="secondary">
-                Buka Status Pengajuan
-              </LinkButton>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold text-slate-500">Pengumuman terbaru</p>
-                <p className="mt-1 text-xl font-bold text-slate-950">
-                  {latestAnnouncement?.title ?? "Belum ada pengumuman"}
-                </p>
-              </div>
-              {latestAnnouncement ? (
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
-                  {formatAnnouncementCategory(latestAnnouncement.category)}
-                </span>
-              ) : null}
-            </div>
-            <p className="text-sm leading-7 text-slate-500">
-              {latestAnnouncement?.content ??
-                "Pengumuman baru dari pengurus akan tampil di sini beserta notifikasi ke akun warga."}
-            </p>
-            {latestAnnouncement ? (
-              <p className="text-xs text-slate-400">
-                Diterbitkan {formatAnnouncementDate(latestAnnouncement.created_at)}
+              <h2
+                id="announcement-detail-title"
+                className="mt-2 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl"
+              >
+                {selectedCard.title}
+              </h2>
+              <p className="mt-4 max-w-prose whitespace-pre-line text-[0.95rem] leading-7 text-slate-700">
+                {selectedCard.content}
               </p>
-            ) : null}
-          </CardContent>
-        </Card>
-      </section>
-
-      <section className="grid gap-4 xl:grid-cols-[0.92fr_1.08fr]">
-        <Card>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <h2 className="text-xl font-bold text-slate-950">Daftar Pengumuman</h2>
-                <p className="text-sm text-slate-500">
-                  Semua informasi yang telah dibagikan untuk warga.
-                </p>
-              </div>
-            </div>
-
-            {isLoading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 4 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="h-28 animate-pulse rounded-[1.3rem] border border-slate-100 bg-slate-50"
-                  />
-                ))}
-              </div>
-            ) : errorMessage ? (
-              <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-                {errorMessage}
-              </div>
-            ) : announcements.length === 0 ? (
+            </>
+          ) : (
+            <div id="announcement-detail-title">
               <EmptyState
-                title="Belum ada pengumuman"
-                description="Saat pengurus membuat pengumuman baru, daftar ini akan terisi otomatis."
+                title={isLoading ? "Memuat pengumuman…" : "Belum ada pengumuman"}
+                description="Pengumuman yang diterbitkan pengurus akan tampil di sini."
               />
-            ) : (
-              <div className="space-y-3">
-                {announcements.map((item) => {
-                  const isActive = selectedCard?.id === item.id;
+            </div>
+          )}
+        </article>
 
-                  return (
+        <section aria-labelledby="announcement-list-title" className="lg:order-1">
+          <h2 id="announcement-list-title" className="mb-3 text-sm font-bold text-slate-900">
+            Semua pengumuman
+          </h2>
+
+          {isLoading ? (
+            <div className="space-y-2" aria-busy="true">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="h-20 animate-pulse rounded-lg border border-[var(--color-line)] bg-white"
+                />
+              ))}
+            </div>
+          ) : errorMessage ? (
+            <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {errorMessage}
+            </div>
+          ) : announcements.length === 0 ? (
+            <p className="text-sm text-slate-500">Belum ada pengumuman.</p>
+          ) : (
+            <ul className="space-y-2">
+              {announcements.map((item) => {
+                const isActive = selectedCard?.id === item.id;
+
+                return (
+                  <li key={item.id}>
                     <button
-                      key={item.id}
                       type="button"
-                      onClick={() =>
+                      aria-current={isActive ? "true" : undefined}
+                      onClick={() => {
                         router.replace(`/pengumuman?announcement=${item.id}`, {
                           scroll: false,
-                        })
-                      }
-                      className={`w-full rounded-[1.35rem] border p-4 text-left transition ${
+                        });
+                        if (window.matchMedia("(max-width: 1023px)").matches) {
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }
+                      }}
+                      className={`w-full rounded-lg border px-4 py-3 text-left ${
                         isActive
-                          ? "border-[var(--color-primary)] bg-[var(--color-primary-soft)]/70"
-                          : "border-slate-200 bg-white hover:border-[var(--color-primary)]/40 hover:bg-slate-50"
+                          ? "border-[var(--color-primary)] bg-[var(--color-primary-soft)]"
+                          : "border-[var(--color-line)] bg-white hover:border-slate-300"
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-base font-bold text-slate-900">{item.title}</p>
-                          <p className="mt-1 text-sm text-slate-500">
-                            {formatAnnouncementCategory(item.category)}
-                          </p>
-                        </div>
-                        <span className="text-xs text-slate-400">
-                          {formatAnnouncementDate(item.created_at)}
-                        </span>
-                      </div>
-                      <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-500">
+                      <p className="text-xs text-slate-500">
+                        {formatAnnouncementCategory(item.category)} &middot;{" "}
+                        {formatAnnouncementDate(item.created_at)}
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-slate-900">{item.title}</p>
+                      <p className="mt-0.5 line-clamp-2 text-sm leading-6 text-slate-500">
                         {item.content}
                       </p>
                     </button>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="space-y-5">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold text-slate-500">Detail pengumuman</p>
-                <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-950">
-                  {selectedCard?.title ?? "Pilih pengumuman"}
-                </h2>
-              </div>
-              {selectedCard ? (
-                <span className="rounded-full bg-[var(--color-primary-soft)] px-3 py-1 text-xs font-bold text-[var(--color-primary)]">
-                  {formatAnnouncementCategory(selectedCard.category)}
-                </span>
-              ) : null}
-            </div>
-
-            {isDetailLoading ? (
-              <div className="h-64 animate-pulse rounded-[1.5rem] bg-slate-50" />
-            ) : selectedCard ? (
-              <>
-                <p className="text-sm text-slate-400">
-                  Diterbitkan {formatAnnouncementDate(selectedCard.created_at)}
-                </p>
-                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-5">
-                  <p className="whitespace-pre-line text-sm leading-7 text-slate-600">
-                    {selectedCard.content}
-                  </p>
-                </div>
-              </>
-            ) : (
-              <EmptyState
-                title="Belum ada detail"
-                description="Pilih salah satu pengumuman dari daftar untuk membaca isi lengkapnya."
-              />
-            )}
-
-            <div className="flex flex-wrap gap-3">
-              <LinkButton href="/dashboard" variant="secondary">
-                Ringkasan Akun
-              </LinkButton>
-              <Link href="/status" className="inline-flex min-h-11 items-center rounded-full px-1 text-sm font-semibold text-[var(--color-primary)]">
-                Lanjut ke status pengajuan
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+      </div>
 
       <ToastContainer toasts={toasts} onDismiss={dismiss} />
     </div>

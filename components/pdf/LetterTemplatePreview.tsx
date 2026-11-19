@@ -39,22 +39,19 @@ export function LetterTemplatePreview({
         <p className="mt-1 text-xs text-slate-500">Nomor: {nomorSurat}</p>
       </div>
 
-      <div className="rounded-xl bg-slate-50 p-3 text-sm leading-6 text-slate-600">
+      <div className="rounded-lg bg-slate-50 p-3 text-sm leading-6 text-slate-600">
         <p className="font-semibold text-slate-900">{meta.shortTitle}</p>
         <p>{meta.description}</p>
-        <p className="mt-2 text-xs uppercase tracking-[0.14em] text-slate-400">
-          Siap print • template resmi • PDF dinamis
-        </p>
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3 text-center text-xs text-slate-500">
-        <div className="rounded-xl border border-slate-200 px-3 py-3">
+        <div className="rounded-lg border border-slate-200 px-3 py-3">
           <p className="font-semibold text-slate-700">Pemohon</p>
           <p className="mt-6 border-t border-dashed border-slate-300 pt-2 text-slate-400">
             Tanda tangan
           </p>
         </div>
-        <div className="rounded-xl border border-slate-200 px-3 py-3">
+        <div className="rounded-lg border border-slate-200 px-3 py-3">
           <p className="font-semibold text-slate-700">{LETTER_SIGNATORIES.mainSignerRole}</p>
           <p className="mt-6 border-t border-dashed border-slate-300 pt-2 font-semibold text-slate-600">
             {LETTER_SIGNATORIES.mainSigner}

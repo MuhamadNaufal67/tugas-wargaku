@@ -7,7 +7,7 @@ type CardProps = HTMLAttributes<HTMLDivElement> & {
 export function Card({ children, className, ...props }: CardProps) {
   return (
     <div
-      className={`rounded-[1.7rem] border border-white/80 bg-white/95 shadow-[var(--shadow-card)] ${className ?? ""}`.trim()}
+      className={`rounded-xl border border-[var(--color-line)] bg-white ${className ?? ""}`.trim()}
       {...props}
     >
       {children}
@@ -22,5 +22,5 @@ export function CardContent({
   children: ReactNode;
   className?: string;
 }) {
-  return <div className={`p-5 sm:p-6 ${className ?? ""}`.trim()}>{children}</div>;
+  return <div className={`p-4 sm:p-6 ${className ?? ""}`.trim()}>{children}</div>;
 }

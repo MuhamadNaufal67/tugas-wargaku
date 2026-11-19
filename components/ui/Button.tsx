@@ -3,16 +3,20 @@ import Link from "next/link";
 
 type ButtonVariant =
   | "primary"
+  | "accent"
   | "secondary"
   | "ghost"
   | "danger"
   | "success"
   | "warning";
 
+type ButtonSize = "md" | "sm";
+
 type CommonProps = {
   children: ReactNode;
   className?: string;
   icon?: ReactNode;
+  size?: ButtonSize;
   variant?: ButtonVariant;
 };
 
@@ -26,22 +30,33 @@ type LinkButtonProps = CommonProps & {
 };
 
 const variantClassNames: Record<ButtonVariant, string> = {
+  accent:
+    "bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-strong)]",
   danger:
-    "border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:border-red-300",
+    "border border-red-200 bg-white text-red-600 hover:border-red-300 hover:bg-red-50",
   ghost:
-    "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300",
+    "text-slate-700 hover:bg-slate-100",
   primary:
-    "bg-[var(--color-primary)] text-white shadow-[0_14px_30px_rgba(45,129,193,0.22)] hover:opacity-95",
+    "bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-strong)]",
   secondary:
-    "border border-slate-200 bg-white text-slate-700 shadow-sm hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]",
+    "border border-[var(--color-line)] bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50",
   success:
-    "border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300",
+    "border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100",
   warning:
-    "border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:border-amber-300",
+    "border border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100",
 };
 
-function getButtonClassName(variant: ButtonVariant, className?: string) {
-  return `inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-[color,background-color,border-color,transform,box-shadow] duration-200 ease-out hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 ${variantClassNames[variant]} ${
+const sizeClassNames: Record<ButtonSize, string> = {
+  md: "min-h-11 px-4 py-2.5 text-sm",
+  sm: "min-h-10 px-3.5 py-2 text-sm",
+};
+
+export function getButtonClassName(
+  variant: ButtonVariant = "primary",
+  className?: string,
+  size: ButtonSize = "md",
+) {
+  return `inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[var(--color-primary)]/30 disabled:cursor-not-allowed disabled:opacity-60 ${sizeClassNames[size]} ${variantClassNames[variant]} ${
     className ?? ""
   }`.trim();
 }
@@ -65,6 +80,7 @@ export function Button({
   children,
   className,
   icon,
+  size,
   type = "button",
   variant = "primary",
   ...props
@@ -72,7 +88,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={getButtonClassName(variant, className)}
+      className={getButtonClassName(variant, className, size)}
       {...props}
     >
       <ButtonInner icon={icon}>{children}</ButtonInner>
@@ -85,10 +101,11 @@ export function LinkButton({
   className,
   href,
   icon,
+  size,
   variant = "primary",
 }: LinkButtonProps) {
   return (
-    <Link href={href} className={getButtonClassName(variant, className)}>
+    <Link href={href} className={getButtonClassName(variant, className, size)}>
       <ButtonInner icon={icon}>{children}</ButtonInner>
     </Link>
   );

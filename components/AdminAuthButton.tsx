@@ -33,7 +33,7 @@ export default function AdminAuthButton({
   if (isLoading) {
     return (
       <span className={pendingClassName}>
-        Memuat...
+        Memuat…
       </span>
     );
   }
@@ -58,7 +58,7 @@ export default function AdminAuthButton({
       onClick={handleLogout}
       className={buttonClassName}
     >
-      Logout
+      Keluar
     </button>
   );
 }

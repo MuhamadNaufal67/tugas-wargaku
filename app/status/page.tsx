@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ToastContainer } from "@/components/Toast";
 import { LetterTemplatePreview } from "@/components/pdf/LetterTemplatePreview";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { createNotification } from "@/lib/notifications";
@@ -22,23 +23,23 @@ type StatusFilter = "semua" | "pending" | "diproses" | "selesai" | "ditolak";
 type UpdatableStatus = "pending" | "diproses" | "selesai" | "ditolak";
 
 const statusStyles = {
-  pending: "border border-amber-200 bg-amber-100 text-amber-700",
-  diproses: "border border-blue-200 bg-blue-100 text-blue-700",
-  selesai: "border border-emerald-200 bg-emerald-100 text-emerald-700",
-  diterima: "border border-emerald-200 bg-emerald-100 text-emerald-700",
-  ditolak: "border border-red-200 bg-red-100 text-red-700",
+  pending: "border border-amber-300 bg-amber-50 text-amber-800",
+  diproses: "border border-blue-300 bg-blue-50 text-blue-800",
+  selesai: "border border-emerald-300 bg-emerald-50 text-emerald-800",
+  diterima: "border border-emerald-300 bg-emerald-50 text-emerald-800",
+  ditolak: "border border-red-300 bg-red-50 text-red-700",
 } as const;
 
 const filterOptions: Array<{ label: string; value: StatusFilter }> = [
   { value: "semua", label: "Semua" },
-  { value: "pending", label: "Pending" },
+  { value: "pending", label: "Menunggu" },
   { value: "diproses", label: "Diproses" },
   { value: "selesai", label: "Selesai" },
   { value: "ditolak", label: "Ditolak" },
 ];
 
 const updateStatusOptions: Array<{ label: string; value: UpdatableStatus }> = [
-  { value: "pending", label: "Pending" },
+  { value: "pending", label: "Menunggu" },
   { value: "diproses", label: "Diproses" },
   { value: "selesai", label: "Selesai" },
   { value: "ditolak", label: "Tolak" },
@@ -67,7 +68,7 @@ function getStatusClassName(status: string) {
 function getStatusLabel(status: string) {
   const normalizedStatus = status.toLowerCase();
 
-  if (normalizedStatus === "pending") return "Pending";
+  if (normalizedStatus === "pending") return "Menunggu";
   if (normalizedStatus === "diproses") return "Diproses";
   if (normalizedStatus === "selesai") return "Selesai";
   if (normalizedStatus === "diterima") return "Diterima";
@@ -491,51 +492,49 @@ export default function StatusPage() {
 
   if (isAuthLoading || (!isAuthenticated && typeof window !== "undefined")) {
     return (
-      <div className="rounded-[1.8rem] border border-white/80 bg-white/95 p-5 shadow-sm sm:p-7">
-        <div className="animate-pulse space-y-5">
-          <div className="h-6 w-40 rounded-full bg-slate-200" />
-          <div className="h-12 rounded-[1.2rem] bg-slate-100" />
-          <div className="flex gap-2">
-            <div className="h-9 w-24 rounded-full bg-slate-100" />
-            <div className="h-9 w-24 rounded-full bg-slate-100" />
-            <div className="h-9 w-24 rounded-full bg-slate-100" />
-          </div>
-          <div className="grid gap-4 xl:grid-cols-2">
-            <div className="h-52 rounded-[1.6rem] bg-slate-100" />
-            <div className="h-52 rounded-[1.6rem] bg-slate-100" />
-          </div>
+      <div aria-busy="true" aria-label="Memuat pengajuan" className="animate-pulse space-y-4">
+        <div className="h-8 w-56 rounded-md bg-slate-200" />
+        <div className="h-11 rounded-lg bg-slate-200/70" />
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="h-48 rounded-xl border border-[var(--color-line)] bg-white" />
+          <div className="h-48 rounded-xl border border-[var(--color-line)] bg-white" />
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="space-y-5 sm:space-y-6">
-      <section className="rounded-[1.9rem] border border-white/80 bg-white/95 p-5 shadow-sm sm:p-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <span className="inline-flex rounded-full bg-[var(--color-primary-soft)] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-primary)]">
-              {isAdmin ? "Panel Pengurus" : "Status Pengajuan"}
-            </span>
-            <h1 className="mt-3 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl lg:text-4xl">
-              {isAdmin
-                ? "Kelola seluruh pengajuan surat warga dari satu halaman."
-                : "Pantau perkembangan pengajuan surat Anda secara langsung."}
-            </h1>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-500 sm:text-base">
-              Halaman ini membantu warga memantau proses layanan, sementara pengurus
-              dapat meninjau detail pengajuan, memberi catatan, dan menyiapkan surat selesai.
-            </p>
-          </div>
-        </div>
-      </section>
+  const isRejected = (item: PengajuanRow) => item.status.toLowerCase() === "ditolak";
 
-      <section className="space-y-4">
+  return (
+    <div className="space-y-6">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="page-title">
+            {isAdmin ? "Kelola pengajuan" : "Status pengajuan"}
+          </h1>
+          <p className="page-lead">
+            {isAdmin
+              ? "Periksa pengajuan warga, ubah statusnya, dan buat surat PDF saat pengajuan selesai."
+              : "Semua surat yang pernah Anda ajukan. Status diperbarui otomatis saat pengurus memprosesnya."}
+          </p>
+        </div>
+        {!isAdmin ? (
+          <button
+            type="button"
+            onClick={() => router.push("/ajukan-surat")}
+            className="min-h-11 shrink-0 rounded-lg bg-[var(--color-accent)] px-4 text-sm font-semibold text-white hover:bg-[var(--color-accent-strong)]"
+          >
+            Ajukan surat baru
+          </button>
+        ) : null}
+      </header>
+
+      <section aria-label="Pencarian dan filter" className="space-y-3">
         <div className="relative">
           <svg
             aria-hidden="true"
             viewBox="0 0 24 24"
-            className="absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-400"
+            className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-400"
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
@@ -547,21 +546,23 @@ export default function StatusPage() {
           </svg>
 
           <input
-            type="text"
-            placeholder="Cari nama, NIK, jenis surat, atau alamat..."
+            type="search"
+            aria-label="Cari pengajuan"
+            placeholder={isAdmin ? "Cari nama, NIK, jenis surat, atau alamat" : "Cari jenis surat"}
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            className="w-full rounded-[1.15rem] border border-slate-200 bg-white py-3 pl-10 pr-10 text-sm text-slate-700 shadow-sm outline-none placeholder:text-slate-400 focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)]"
+            className="input pl-10 pr-11"
           />
 
           {searchQuery ? (
             <button
               type="button"
               onClick={() => setSearchQuery("")}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 hover:text-slate-700"
               aria-label="Hapus pencarian"
             >
               <svg
+                aria-hidden="true"
                 viewBox="0 0 24 24"
                 className="h-4 w-4"
                 fill="none"
@@ -576,264 +577,238 @@ export default function StatusPage() {
           ) : null}
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          {filterOptions.map((filter) => {
-            const isActive = activeFilter === filter.value;
-
-            return (
-              <button
-                key={filter.value}
-                type="button"
-                onClick={() => setActiveFilter(filter.value)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  isActive
-                    ? "bg-[var(--color-primary)] text-white shadow-sm"
-                    : "border border-slate-200 bg-white text-slate-600 hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
-                }`}
-              >
-                {filter.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {!isLoading && !errorMessage ? (
-          <p className="text-sm text-slate-500">
-            Menampilkan{" "}
-            <span className="font-semibold text-[var(--color-primary)]">
-              {filteredPengajuan.length}
-            </span>{" "}
-            pengajuan
-            {searchQuery ? (
-              <>
-                {" "}untuk{" "}
-                <span className="font-semibold text-slate-700">
-                  &quot;{searchQuery}&quot;
-                </span>
-              </>
-            ) : null}
-          </p>
-        ) : null}
-
-        {isLoading ? (
-          <div className="grid gap-4 xl:grid-cols-2">
-            <div className="h-56 animate-pulse rounded-[1.6rem] bg-slate-100" />
-            <div className="h-56 animate-pulse rounded-[1.6rem] bg-slate-100" />
-          </div>
-        ) : null}
-
-        {!isLoading && errorMessage ? (
-          <div className="rounded-[1.3rem] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {errorMessage}
-          </div>
-        ) : null}
-
-        {!isLoading && !errorMessage && filteredPengajuan.length === 0 ? (
-          <div className="rounded-[1.7rem] border border-slate-200 bg-white px-6 py-10 text-center shadow-sm">
-            <p className="text-base font-semibold text-slate-900">
-              {searchQuery ? "Tidak ada hasil yang cocok" : "Belum ada pengajuan"}
-            </p>
-            <p className="mt-1 text-sm leading-6 text-slate-500">
-              {searchQuery
-                ? `Coba kata kunci lain untuk "${searchQuery}".`
-                : isAdmin
-                  ? "Pengajuan warga akan muncul di sini setelah ada formulir yang dikirim."
-                  : "Ajukan surat pertama Anda untuk mulai memantau statusnya."}
-            </p>
-          </div>
-        ) : null}
-
-        {!isLoading && !errorMessage ? (
-          <div className="grid gap-4 xl:grid-cols-2">
-            {filteredPengajuan.map((item) => {
-              const itemUpdatingStatus = updatingStatusMap[item.id];
+        <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+          <div role="group" aria-label="Filter status" className="flex w-max gap-2">
+            {filterOptions.map((filter) => {
+              const isActive = activeFilter === filter.value;
 
               return (
-                <article
-                  key={item.id}
-                  className={`rounded-[1.7rem] border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
-                    item.id === highlightedPengajuanId
-                      ? "border-[var(--color-primary)] ring-2 ring-[var(--color-primary-soft)]"
-                      : "border-slate-200"
+                <button
+                  key={filter.value}
+                  type="button"
+                  aria-pressed={isActive}
+                  onClick={() => setActiveFilter(filter.value)}
+                  className={`min-h-10 rounded-full px-4 text-sm font-semibold ${
+                    isActive
+                      ? "bg-slate-900 text-white"
+                      : "border border-[var(--color-line)] bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
-                    <div className="min-w-0">
-                      <h2 className="truncate text-lg font-bold text-slate-900">
-                        {item.jenis_surat}
-                      </h2>
-                      <p className="mt-0.5 text-xs text-slate-400">
-                        Diajukan {formatTanggal(item.created_at)}
-                      </p>
-                    </div>
-
-                    <span
-                      className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${getStatusClassName(item.status)}`}
-                    >
-                      {getStatusLabel(item.status)}
-                    </span>
-                  </div>
-
-                  <div className="px-5 py-4">
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-primary-soft)] text-[var(--color-primary)]">
-                        <svg
-                          aria-hidden="true"
-                          viewBox="0 0 24 24"
-                          className="h-5 w-5"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M20 21a8 8 0 0 0-16 0" />
-                          <circle cx="12" cy="7" r="4" />
-                        </svg>
-                      </span>
-
-                      <div className="min-w-0">
-                        <p className="truncate font-semibold text-slate-900">
-                          {item.nama}
-                        </p>
-                        <p className="text-xs text-slate-400">NIK {item.nik}</p>
-                      </div>
-                    </div>
-
-                    <p className="mt-3 text-sm leading-relaxed text-slate-500">
-                      {item.alamat}
-                    </p>
-
-                    {item.status.toLowerCase() === "ditolak" &&
-                    item.alasan_penolakan ? (
-                      <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                        <span className="font-semibold">Alasan penolakan:</span>{" "}
-                        {item.alasan_penolakan}
-                      </div>
-                    ) : null}
-                  </div>
-
-                  <div className="border-t border-slate-100 px-5 py-4">
-                    <div className="flex flex-wrap items-center gap-2.5">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setRecentPdfMessage("");
-                          setSelectedPengajuan(item);
-                        }}
-                        className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full bg-[var(--color-primary)] px-4 py-2.5 text-xs font-semibold text-white transition hover:opacity-90"
-                      >
-                        Lihat Detail
-                      </button>
-
-                      {isDownloadReady(item.status) ? (
-                        <button
-                          type="button"
-                          onClick={() => handleDownload(item)}
-                          className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
-                        >
-                          Download Surat
-                        </button>
-                      ) : null}
-
-                      {!isAdmin && item.status.toLowerCase() === "ditolak" ? (
-                        <button
-                          type="button"
-                          onClick={() => handleReapply(item)}
-                          className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs font-semibold text-amber-700 transition hover:bg-amber-100"
-                        >
-                          Ajukan Ulang
-                        </button>
-                      ) : null}
-
-                      {isAdmin ? (
-                        <>
-                          {updateStatusOptions.map((statusOption) => {
-                            const isUpdating =
-                              itemUpdatingStatus === statusOption.value;
-                            const isDisabled = Boolean(itemUpdatingStatus);
-                            const isActive =
-                              item.status.toLowerCase() === statusOption.value;
-
-                            return (
-                              <button
-                                key={statusOption.value}
-                                type="button"
-                                onClick={() => {
-                                  if (statusOption.value === "ditolak") {
-                                    startRejectFlow(item);
-                                    return;
-                                  }
-
-                                  void handleStatusUpdate(
-                                    item,
-                                    statusOption.value,
-                                  );
-                                }}
-                                disabled={isDisabled}
-                                className={`inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full px-3.5 py-2.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                                  isActive
-                                    ? getStatusClassName(statusOption.value)
-                                    : "border border-slate-200 bg-white text-slate-600 hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
-                                }`}
-                              >
-                                {isUpdating ? (
-                                  <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                                ) : null}
-                                {isUpdating
-                                  ? "Menyimpan..."
-                                  : statusOption.label}
-                              </button>
-                            );
-                          })}
-
-                          <button
-                            type="button"
-                            onClick={() => handleDeletePengajuan(item)}
-                            className="ml-auto inline-flex min-h-10 items-center justify-center rounded-full border border-red-200 px-3.5 py-2.5 text-xs font-semibold text-red-500 transition hover:bg-red-50"
-                          >
-                            Hapus
-                          </button>
-                        </>
-                      ) : (
-                        <span className="text-xs text-slate-400">
-                          Informasi ini hanya ditampilkan untuk akun Anda.
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </article>
+                  {filter.label}
+                </button>
               );
             })}
           </div>
+        </div>
+
+        {!isLoading && !errorMessage ? (
+          <p className="text-sm text-slate-500" aria-live="polite">
+            {filteredPengajuan.length} pengajuan
+            {searchQuery ? <> untuk &ldquo;{searchQuery}&rdquo;</> : null}
+          </p>
         ) : null}
       </section>
 
+      {isLoading ? (
+        <div className="grid gap-4 lg:grid-cols-2" aria-busy="true">
+          <div className="h-48 animate-pulse rounded-xl border border-[var(--color-line)] bg-white" />
+          <div className="h-48 animate-pulse rounded-xl border border-[var(--color-line)] bg-white" />
+        </div>
+      ) : null}
+
+      {!isLoading && errorMessage ? (
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {errorMessage}
+        </div>
+      ) : null}
+
+      {!isLoading && !errorMessage && filteredPengajuan.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-[var(--color-line)] px-6 py-12 text-center">
+          <p className="font-semibold text-slate-900">
+            {searchQuery || activeFilter !== "semua"
+              ? "Tidak ada pengajuan yang cocok"
+              : "Belum ada pengajuan"}
+          </p>
+          <p className="mx-auto mt-1 max-w-sm text-sm leading-6 text-slate-500">
+            {searchQuery || activeFilter !== "semua"
+              ? "Ubah kata kunci atau pilih filter Semua."
+              : isAdmin
+                ? "Pengajuan dari warga akan muncul di sini."
+                : "Surat yang Anda ajukan akan muncul di sini beserta statusnya."}
+          </p>
+          {!isAdmin && !searchQuery && activeFilter === "semua" ? (
+            <button
+              type="button"
+              onClick={() => router.push("/ajukan-surat")}
+              className="mt-5 min-h-11 rounded-lg bg-[var(--color-primary)] px-5 text-sm font-semibold text-white hover:bg-[var(--color-primary-strong)]"
+            >
+              Ajukan surat pertama
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+
+      {!isLoading && !errorMessage && filteredPengajuan.length > 0 ? (
+        <ul className="grid gap-4 lg:grid-cols-2">
+          {filteredPengajuan.map((item) => {
+            const itemUpdatingStatus = updatingStatusMap[item.id];
+
+            return (
+              <li
+                key={item.id}
+                className={`flex flex-col rounded-xl border bg-white ${
+                  item.id === highlightedPengajuanId
+                    ? "border-[var(--color-primary)] ring-3 ring-[var(--color-primary)]/15"
+                    : "border-[var(--color-line)]"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3 px-4 pt-4 sm:px-5 sm:pt-5">
+                  <div className="min-w-0">
+                    <h2 className="text-base font-bold text-slate-900">{item.jenis_surat}</h2>
+                    <p className="mt-0.5 text-sm text-slate-500">
+                      Diajukan {formatTanggal(item.created_at)}
+                    </p>
+                  </div>
+                  <StatusBadge status={item.status} />
+                </div>
+
+                <div className="flex-1 px-4 py-3 sm:px-5">
+                  <p className="text-sm font-medium text-slate-800">{item.nama}</p>
+                  <p className="text-sm tabular-nums text-slate-500">NIK {item.nik}</p>
+                  <p className="mt-1 line-clamp-2 text-sm text-slate-500">{item.alamat}</p>
+
+                  {isRejected(item) && item.alasan_penolakan ? (
+                    <div className="mt-3 rounded-lg bg-red-50 px-3.5 py-2.5 text-sm leading-6 text-red-800">
+                      <span className="font-semibold">Catatan pengurus:</span>{" "}
+                      {item.alasan_penolakan}
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 border-t border-[var(--color-line)] px-4 py-3 sm:px-5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRecentPdfMessage("");
+                      setSelectedPengajuan(item);
+                    }}
+                    className="min-h-10 rounded-lg border border-[var(--color-line)] bg-white px-3.5 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+                  >
+                    Lihat detail
+                  </button>
+
+                  {isDownloadReady(item.status) ? (
+                    <button
+                      type="button"
+                      onClick={() => handleDownload(item)}
+                      className="min-h-10 rounded-lg bg-[var(--color-primary)] px-3.5 text-sm font-semibold text-white hover:bg-[var(--color-primary-strong)]"
+                    >
+                      Unduh surat
+                    </button>
+                  ) : null}
+
+                  {!isAdmin && isRejected(item) ? (
+                    <button
+                      type="button"
+                      onClick={() => handleReapply(item)}
+                      className="min-h-10 rounded-lg bg-[var(--color-accent)] px-3.5 text-sm font-semibold text-white hover:bg-[var(--color-accent-strong)]"
+                    >
+                      Ajukan ulang
+                    </button>
+                  ) : null}
+
+                  {isAdmin ? (
+                    <button
+                      type="button"
+                      onClick={() => handleDeletePengajuan(item)}
+                      className="ml-auto min-h-10 rounded-lg px-3 text-sm font-semibold text-red-600 hover:bg-red-50"
+                    >
+                      Hapus
+                    </button>
+                  ) : null}
+                </div>
+
+                {isAdmin ? (
+                  <div className="border-t border-[var(--color-line)] bg-slate-50/70 px-4 py-3 sm:px-5">
+                    <p id={`status-label-${item.id}`} className="mb-2 text-xs font-semibold text-slate-500">
+                      Ubah status
+                    </p>
+                    <div
+                      role="group"
+                      aria-labelledby={`status-label-${item.id}`}
+                      className="grid grid-cols-2 gap-2 sm:grid-cols-4"
+                    >
+                      {updateStatusOptions.map((statusOption) => {
+                        const isUpdating = itemUpdatingStatus === statusOption.value;
+                        const isDisabled = Boolean(itemUpdatingStatus);
+                        const isActive = item.status.toLowerCase() === statusOption.value;
+
+                        return (
+                          <button
+                            key={statusOption.value}
+                            type="button"
+                            aria-pressed={isActive}
+                            onClick={() => {
+                              if (statusOption.value === "ditolak") {
+                                startRejectFlow(item);
+                                return;
+                              }
+
+                              void handleStatusUpdate(item, statusOption.value);
+                            }}
+                            disabled={isDisabled}
+                            className={`inline-flex min-h-10 items-center justify-center gap-1.5 rounded-lg px-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60 ${
+                              isActive
+                                ? getStatusClassName(statusOption.value)
+                                : "border border-[var(--color-line)] bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
+                            }`}
+                          >
+                            {isUpdating ? (
+                              <span aria-hidden="true" className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                            ) : null}
+                            {isUpdating ? "Menyimpan…" : statusOption.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+
       {activeSelectedPengajuan ? (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/40 p-4 backdrop-blur-sm sm:items-center"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 sm:items-center sm:p-4"
           onClick={(event) => {
             if (event.target === event.currentTarget) {
               closeSelectedPengajuan();
             }
           }}
         >
-          <div className="w-full max-w-xl rounded-[1.8rem] border border-white/80 bg-white shadow-2xl">
-            <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-6">
-              <div>
-                <span className="inline-flex rounded-full bg-[var(--color-primary-soft)] px-3 py-1 text-xs font-bold uppercase tracking-wider text-[var(--color-primary)]">
-                  Detail Pengajuan
-                </span>
-                <h2 className="mt-2 text-xl font-extrabold tracking-tight text-slate-950">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="detail-title"
+            className="flex max-h-[92vh] w-full max-w-xl flex-col rounded-t-2xl bg-white shadow-xl sm:rounded-xl"
+          >
+            <div className="flex items-start justify-between gap-4 border-b border-[var(--color-line)] px-5 py-4">
+              <div className="min-w-0">
+                <h2 id="detail-title" className="text-lg font-bold text-slate-900">
                   {activeSelectedPengajuan.jenis_surat}
                 </h2>
+                <div className="mt-1.5">
+                  <StatusBadge status={activeSelectedPengajuan.status} />
+                </div>
               </div>
 
               <button
                 type="button"
                 onClick={closeSelectedPengajuan}
-                className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-                aria-label="Tutup detail pengajuan"
+                className="-mr-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                aria-label="Tutup"
               >
                 <svg
                   aria-hidden="true"
@@ -850,92 +825,60 @@ export default function StatusPage() {
               </button>
             </div>
 
-            <div className="max-h-[75vh] overflow-y-auto p-5 sm:p-6">
-              <div className="grid gap-3 sm:grid-cols-2">
+            <div className="overflow-y-auto px-5 py-4">
+              <dl className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
                 {[
                   { label: "Nama", value: activeSelectedPengajuan.nama },
                   { label: "NIK", value: activeSelectedPengajuan.nik },
                   {
-                    label: "Tanggal Pengajuan",
+                    label: "Tanggal pengajuan",
                     value: formatTanggal(activeSelectedPengajuan.created_at),
                   },
+                  {
+                    label: "Dokumen pendukung",
+                    value: activeSelectedPengajuan.dokumen || "Tidak ada",
+                  },
                 ].map((field) => (
-                  <div
-                    key={field.label}
-                    className="rounded-xl bg-slate-50 p-3.5"
-                  >
-                    <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                      {field.label}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-slate-900">
+                  <div key={field.label} className="min-w-0">
+                    <dt className="text-xs text-slate-500">{field.label}</dt>
+                    <dd className="mt-0.5 break-words text-sm font-medium text-slate-900">
                       {field.value}
-                    </p>
+                    </dd>
                   </div>
                 ))}
-
-                <div className="rounded-xl bg-slate-50 p-3.5">
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                    Status
-                  </p>
-                  <div className="mt-1.5">
-                    <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${getStatusClassName(
-                        activeSelectedPengajuan.status,
-                      )}`}
-                    >
-                      {getStatusLabel(activeSelectedPengajuan.status)}
-                    </span>
-                  </div>
+                <div className="sm:col-span-2">
+                  <dt className="text-xs text-slate-500">Alamat</dt>
+                  <dd className="mt-0.5 text-sm leading-6 text-slate-900">
+                    {activeSelectedPengajuan.alamat}
+                  </dd>
                 </div>
-              </div>
-
-              <div className="mt-3 rounded-xl bg-slate-50 p-3.5">
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Alamat
-                </p>
-                <p className="mt-1 text-sm leading-relaxed text-slate-700">
-                  {activeSelectedPengajuan.alamat}
-                </p>
-              </div>
+              </dl>
 
               {activeSelectedPengajuan.alasan_penolakan ? (
-                <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3.5">
-                  <p className="text-xs font-bold uppercase tracking-wider text-red-500">
-                    Catatan Perbaikan
-                  </p>
-                  <p className="mt-1 text-sm leading-relaxed text-red-700">
+                <div className="mt-4 rounded-lg bg-red-50 px-3.5 py-3">
+                  <p className="text-xs font-semibold text-red-700">Catatan pengurus</p>
+                  <p className="mt-1 text-sm leading-6 text-red-800">
                     {activeSelectedPengajuan.alasan_penolakan}
                   </p>
                 </div>
               ) : null}
 
               {isAdmin ? (
-                <div className="mt-4 space-y-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                        Rancangan Surat
-                      </p>
-                      <p className="mt-1 text-sm text-slate-500">
-                        Format surat ini akan dipakai saat layanan dinyatakan selesai.
-                      </p>
-                    </div>
-                    {recentPdfMessage ? (
-                      <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-semibold text-emerald-700">
-                        Siap diunduh
-                      </span>
-                    ) : null}
+                <div className="mt-5 border-t border-[var(--color-line)] pt-4">
+                  <h3 className="text-sm font-bold text-slate-900">Pratinjau surat</h3>
+                  <p className="mt-0.5 text-sm text-slate-500">
+                    Format ini dipakai saat status diubah menjadi Selesai.
+                  </p>
+
+                  <div className="mt-3">
+                    <LetterTemplatePreview
+                      jenisSurat={activeSelectedPengajuan.jenis_surat}
+                      nomorSurat={prepareSubmissionPdf(activeSelectedPengajuan).nomorSurat}
+                    />
                   </div>
 
-                  <LetterTemplatePreview
-                    jenisSurat={activeSelectedPengajuan.jenis_surat}
-                    nomorSurat={
-                      prepareSubmissionPdf(activeSelectedPengajuan).nomorSurat
-                    }
-                  />
-
                   {recentPdfMessage ? (
-                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                    <div role="status" className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3.5 py-3 text-sm text-emerald-800">
                       {recentPdfMessage}
                     </div>
                   ) : null}
@@ -943,35 +886,34 @@ export default function StatusPage() {
               ) : null}
             </div>
 
-            <div className="flex flex-col-reverse gap-2 border-t border-slate-100 px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
+            <div className="flex flex-col-reverse gap-2 border-t border-[var(--color-line)] px-5 py-4 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={closeSelectedPengajuan}
+                className="min-h-11 rounded-lg border border-[var(--color-line)] bg-white px-5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Tutup
+              </button>
+
+              {!isAdmin && isRejected(activeSelectedPengajuan) ? (
+                <button
+                  type="button"
+                  onClick={() => handleReapply(activeSelectedPengajuan)}
+                  className="min-h-11 rounded-lg bg-[var(--color-accent)] px-5 text-sm font-semibold text-white hover:bg-[var(--color-accent-strong)]"
+                >
+                  Ajukan ulang
+                </button>
+              ) : null}
+
               {isDownloadReady(activeSelectedPengajuan.status) ? (
                 <button
                   type="button"
                   onClick={() => handleDownload(activeSelectedPengajuan)}
-                  className="inline-flex min-h-11 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 px-5 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-100"
+                  className="min-h-11 rounded-lg bg-[var(--color-primary)] px-5 text-sm font-semibold text-white hover:bg-[var(--color-primary-strong)]"
                 >
-                  Download Surat
+                  Unduh surat
                 </button>
               ) : null}
-
-              {!isAdmin &&
-              activeSelectedPengajuan.status.toLowerCase() === "ditolak" ? (
-                <button
-                  type="button"
-                  onClick={() => handleReapply(activeSelectedPengajuan)}
-                  className="inline-flex min-h-11 items-center justify-center rounded-full border border-amber-200 bg-amber-50 px-5 py-2.5 text-sm font-semibold text-amber-700 hover:bg-amber-100"
-                >
-                  Ajukan Ulang
-                </button>
-              ) : null}
-
-              <button
-                type="button"
-                onClick={closeSelectedPengajuan}
-                className="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                Tutup
-              </button>
             </div>
           </div>
         </div>
@@ -979,55 +921,57 @@ export default function StatusPage() {
 
       {rejectTarget ? (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/40 p-4 backdrop-blur-sm sm:items-center"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 sm:items-center sm:p-4"
           onClick={(event) => {
             if (event.target === event.currentTarget) {
               setRejectTarget(null);
             }
           }}
         >
-          <div className="w-full max-w-lg rounded-[1.8rem] border border-white/80 bg-white shadow-2xl">
-            <div className="border-b border-slate-100 px-5 py-4 sm:px-6">
-              <h2 className="text-lg font-bold text-slate-900">
-                Kembalikan untuk Diperbaiki
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="reject-title"
+            className="w-full max-w-lg rounded-t-2xl bg-white shadow-xl sm:rounded-xl"
+          >
+            <div className="border-b border-[var(--color-line)] px-5 py-4">
+              <h2 id="reject-title" className="text-lg font-bold text-slate-900">
+                Tolak pengajuan
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Isi catatan perbaikan untuk {rejectTarget.nama} sebelum status
-                diubah menjadi ditolak.
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                {rejectTarget.nama} akan menerima catatan ini dan bisa
+                mengajukan ulang setelah memperbaikinya.
               </p>
             </div>
 
-            <div className="p-5 sm:p-6">
-              <label
-                htmlFor="rejectReason"
-                className="mb-2 block text-sm font-semibold text-slate-700"
-              >
-                Catatan Perbaikan
+            <div className="px-5 py-4">
+              <label htmlFor="rejectReason" className="label">
+                Apa yang perlu diperbaiki?
               </label>
               <textarea
                 id="rejectReason"
                 rows={4}
                 value={rejectReason}
                 onChange={(event) => setRejectReason(event.target.value)}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-slate-900 outline-none transition focus:border-[var(--color-primary)] focus:bg-white"
-                placeholder="Tulis catatan yang membantu warga memperbaiki pengajuannya."
+                className="input"
+                placeholder="Contoh: NIK tidak sesuai dengan KTP. Mohon periksa kembali."
               />
             </div>
 
-            <div className="flex flex-col-reverse gap-2 border-t border-slate-100 px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
+            <div className="flex flex-col-reverse gap-2 border-t border-[var(--color-line)] px-5 py-4 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 onClick={() => setRejectTarget(null)}
-                className="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                className="min-h-11 rounded-lg border border-[var(--color-line)] bg-white px-5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
               >
                 Batal
               </button>
               <button
                 type="button"
                 onClick={() => void confirmReject()}
-                className="inline-flex min-h-11 items-center justify-center rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
+                className="min-h-11 rounded-lg bg-red-600 px-5 text-sm font-semibold text-white hover:bg-red-700"
               >
-                Simpan Penolakan
+                Tolak pengajuan
               </button>
             </div>
           </div>

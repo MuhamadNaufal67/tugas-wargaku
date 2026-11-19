@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ToastContainer } from "@/components/Toast";
-import { Button, LinkButton } from "@/components/ui/Button";
-import { Card, CardContent } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
@@ -178,178 +177,143 @@ export default function AdminAnnouncementsPage() {
 
   if (isAuthLoading || (typeof window !== "undefined" && (!user || !isAdmin))) {
     return (
-      <div className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-        <div className="h-80 animate-pulse rounded-[1.7rem] border border-white/80 bg-white/95 shadow-sm" />
-        <div className="h-80 animate-pulse rounded-[1.7rem] border border-white/80 bg-white/95 shadow-sm" />
+      <div aria-busy="true" aria-label="Memuat halaman" className="animate-pulse space-y-6">
+        <div className="h-8 w-56 rounded-md bg-slate-200" />
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="h-80 rounded-xl border border-[var(--color-line)] bg-white" />
+          <div className="h-80 rounded-xl border border-[var(--color-line)] bg-white" />
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-        <Card>
-          <CardContent className="space-y-5">
-            <span className="inline-flex rounded-full bg-[var(--color-primary-soft)] px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-primary)]">
-              Pengumuman Pengurus
-            </span>
+      <header>
+        <h1 className="page-title">Pengumuman</h1>
+        <p className="page-lead">
+          Tulis informasi untuk warga. Setelah diterbitkan, pengumuman tampil
+          di halaman warga dan dikirim sebagai notifikasi ke setiap akun warga.
+        </p>
+      </header>
+
+      <div className="grid items-start gap-6 lg:grid-cols-[1fr_1fr]">
+        <section
+          aria-labelledby="new-announcement"
+          className="rounded-xl border border-[var(--color-line)] bg-white p-5 sm:p-6"
+        >
+          <h2 id="new-announcement" className="section-title">
+            Pengumuman baru
+          </h2>
+          <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
             <div>
-              <h1 className="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">
-                Bagikan kabar penting warga tanpa mengganggu alur layanan utama.
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500 sm:text-base">
-                Gunakan halaman ini untuk menerbitkan informasi RT, pengumuman
-                layanan, agenda kegiatan, atau pemberitahuan darurat ke akun warga.
-              </p>
+              <label htmlFor="announcement-title" className="label">
+                Judul
+              </label>
+              <input
+                id="announcement-title"
+                type="text"
+                value={formData.title}
+                onChange={(event) => updateField("title", event.target.value)}
+                className="input"
+                placeholder="Contoh: Kerja bakti hari Minggu"
+              />
             </div>
-            <div className="flex flex-wrap gap-3">
-              <LinkButton href="/admin">Kembali ke Dashboard</LinkButton>
-              <LinkButton href="/pengumuman" variant="secondary">
-                Lihat Halaman Warga
-              </LinkButton>
-            </div>
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardContent>
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <div className="grid gap-4 sm:grid-cols-[1fr_13rem]">
-                <div>
-                  <label
-                    htmlFor="announcement-title"
-                    className="mb-2 block text-sm font-semibold text-slate-700"
-                  >
-                    Judul Pengumuman
-                  </label>
-                  <input
-                    id="announcement-title"
-                    type="text"
-                    value={formData.title}
-                    onChange={(event) => updateField("title", event.target.value)}
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[var(--color-primary)] focus:bg-white"
-                    placeholder="Contoh: Jadwal kerja bakti akhir pekan"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="announcement-category"
-                    className="mb-2 block text-sm font-semibold text-slate-700"
-                  >
-                    Kategori
-                  </label>
-                  <select
-                    id="announcement-category"
-                    value={formData.category}
-                    onChange={(event) =>
-                      updateField(
-                        "category",
-                        event.target.value as AnnouncementCategory,
-                      )
-                    }
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[var(--color-primary)] focus:bg-white"
-                  >
-                    {announcementCategories.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="announcement-content"
-                  className="mb-2 block text-sm font-semibold text-slate-700"
-                >
-                  Isi Pengumuman
-                </label>
-                <textarea
-                  id="announcement-content"
-                  rows={7}
-                  value={formData.content}
-                  onChange={(event) => updateField("content", event.target.value)}
-                  className="w-full rounded-[1.5rem] border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-7 text-slate-900 outline-none transition focus:border-[var(--color-primary)] focus:bg-white"
-                  placeholder="Tulis isi pengumuman yang ingin dibagikan ke warga..."
-                />
-              </div>
-
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-sm text-slate-500">
-                  Notifikasi akan otomatis dikirim ke akun warga aktif.
-                </p>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Menerbitkan..." : "Terbitkan Pengumuman"}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </section>
-
-      <Card>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-xl font-bold text-slate-950">Riwayat Pengumuman</h2>
-              <p className="text-sm text-slate-500">
-                Pengumuman terbaru yang telah diterbitkan untuk warga.
-              </p>
+              <label htmlFor="announcement-category" className="label">
+                Kategori
+              </label>
+              <select
+                id="announcement-category"
+                value={formData.category}
+                onChange={(event) =>
+                  updateField(
+                    "category",
+                    event.target.value as AnnouncementCategory,
+                  )
+                }
+                className="input"
+              >
+                {announcementCategories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
             </div>
-            <Button onClick={() => void loadAnnouncements()} variant="secondary">
-              Refresh
+
+            <div>
+              <label htmlFor="announcement-content" className="label">
+                Isi pengumuman
+              </label>
+              <textarea
+                id="announcement-content"
+                rows={7}
+                value={formData.content}
+                onChange={(event) => updateField("content", event.target.value)}
+                className="input leading-6"
+                placeholder="Tulis waktu, tempat, dan apa yang perlu disiapkan warga."
+              />
+            </div>
+
+            <div className="flex justify-end border-t border-[var(--color-line)] pt-4">
+              <Button type="submit" variant="accent" disabled={isSubmitting} className="w-full sm:w-auto">
+                {isSubmitting ? "Menerbitkan…" : "Terbitkan"}
+              </Button>
+            </div>
+          </form>
+        </section>
+
+        <section aria-labelledby="announcement-history" className="rounded-xl border border-[var(--color-line)] bg-white">
+          <div className="flex items-center justify-between gap-3 px-5 pt-5 sm:px-6">
+            <h2 id="announcement-history" className="section-title">
+              Sudah diterbitkan
+            </h2>
+            <Button onClick={() => void loadAnnouncements()} variant="secondary" size="sm">
+              Muat ulang
             </Button>
           </div>
 
           {isLoading ? (
-            <div className="grid gap-3 lg:grid-cols-2">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="h-36 animate-pulse rounded-[1.4rem] border border-slate-100 bg-slate-50"
-                />
+            <div className="space-y-2 p-5 sm:px-6" aria-busy="true">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="h-20 animate-pulse rounded-lg bg-slate-100" />
               ))}
             </div>
           ) : errorMessage ? (
-            <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-              {errorMessage}
+            <div className="p-5 sm:px-6">
+              <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {errorMessage}
+              </div>
             </div>
           ) : announcements.length === 0 ? (
-            <EmptyState
-              title="Belum ada pengumuman"
-              description="Pengumuman pertama yang Anda terbitkan akan muncul di sini."
-            />
+            <div className="p-5 sm:px-6">
+              <EmptyState
+                title="Belum ada pengumuman"
+                description="Pengumuman pertama yang Anda terbitkan akan muncul di sini."
+              />
+            </div>
           ) : (
-            <div className="grid gap-3 lg:grid-cols-2">
+            <ul className="mt-3 divide-y divide-[var(--color-line)] border-t border-[var(--color-line)]">
               {announcements.map((announcement) => (
-                <div
-                  key={announcement.id}
-                  className="rounded-[1.4rem] border border-slate-200 bg-slate-50/80 p-4"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-base font-bold text-slate-900">
-                        {announcement.title}
-                      </p>
-                      <p className="mt-1 text-sm text-slate-500">
-                        {formatAnnouncementCategory(announcement.category)}
-                      </p>
-                    </div>
-                    <span className="shrink-0 text-xs text-slate-400">
-                      {formatAnnouncementDate(announcement.created_at)}
-                    </span>
-                  </div>
-                  <p className="mt-3 line-clamp-4 text-sm leading-6 text-slate-500">
+                <li key={announcement.id} className="px-5 py-3.5 sm:px-6">
+                  <p className="text-xs text-slate-500">
+                    {formatAnnouncementCategory(announcement.category)} &middot;{" "}
+                    {formatAnnouncementDate(announcement.created_at)}
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-slate-900">
+                    {announcement.title}
+                  </p>
+                  <p className="mt-0.5 line-clamp-3 text-sm leading-6 text-slate-500">
                     {announcement.content}
                   </p>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
-        </CardContent>
-      </Card>
+        </section>
+      </div>
 
       <ToastContainer toasts={toasts} onDismiss={dismiss} />
     </div>

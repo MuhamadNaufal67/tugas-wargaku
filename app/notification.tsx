@@ -324,7 +324,7 @@ export default function Notification() {
             void loadNotifications();
           }
         }}
-        className="relative flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200/80 bg-white text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+        className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--color-line)] bg-white text-slate-700 hover:bg-slate-50"
         aria-label={
           unreadCount > 0
             ? `Notifikasi, ${unreadCount} belum dibaca`
@@ -347,7 +347,7 @@ export default function Notification() {
         </svg>
 
         {unreadCount > 0 ? (
-          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[0.6rem] font-bold leading-none text-white">
+          <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--color-accent)] px-1 text-[0.65rem] font-bold leading-none text-white ring-2 ring-white">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         ) : null}
@@ -355,13 +355,13 @@ export default function Notification() {
 
       {isOpen ? (
         <div
-          className="absolute right-0 top-full z-50 mt-3 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-[1.6rem] border border-slate-200/80 bg-white/98 shadow-[0_24px_60px_rgba(15,23,42,0.14)]"
+          className="fixed inset-x-4 top-[4.25rem] z-50 overflow-hidden rounded-xl border border-[var(--color-line)] bg-white shadow-lg sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-[22rem]"
           role="dialog"
           aria-label="Panel notifikasi"
         >
-          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3.5">
+          <div className="flex items-center justify-between border-b border-[var(--color-line)] px-4 py-3">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-slate-800">
+              <span className="text-sm font-bold text-slate-900">
                 Notifikasi
               </span>
               {unreadCount > 0 ? (
@@ -376,14 +376,14 @@ export default function Notification() {
                 type="button"
                 onClick={() => void markAllAsRead()}
                 disabled={isMarkingAll}
-                className="text-xs font-semibold text-[var(--color-primary)] transition disabled:cursor-not-allowed disabled:opacity-60 hover:underline"
+                className="min-h-9 rounded-md px-2 text-sm font-semibold text-[var(--color-primary)] hover:bg-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isMarkingAll ? "Menandai..." : "Tandai semua"}
+                {isMarkingAll ? "Menandai…" : "Tandai semua dibaca"}
               </button>
             ) : null}
           </div>
 
-          <div className="max-h-80 overflow-y-auto">
+          <div className="max-h-[60vh] overflow-y-auto sm:max-h-96">
             {isLoadingList ? (
               <NotificationListSkeleton />
             ) : !user ? (
@@ -394,7 +394,7 @@ export default function Notification() {
               <div className="p-4">
                 <EmptyState
                   title="Belum ada pemberitahuan"
-                  description="Pemberitahuan akan muncul saat ada perkembangan pengajuan atau informasi layanan untuk Anda."
+                  description="Anda akan diberi tahu di sini saat status pengajuan berubah atau ada pengumuman baru."
                 />
               </div>
             ) : (
@@ -412,17 +412,17 @@ export default function Notification() {
                       key={item.id}
                       type="button"
                       onClick={() => void handleNotificationClick(item)}
-                      className={`flex w-full items-start gap-3 border-b border-slate-50 px-4 py-3.5 text-left transition last:border-0 hover:bg-slate-50 ${
+                      className={`flex w-full items-start gap-3 border-b border-[var(--color-line)] px-4 py-3 text-left last:border-0 hover:bg-slate-50 ${
                         isAnnouncement && isFreshAnnouncement
-                          ? "bg-amber-50/60"
+                          ? "bg-orange-50/60"
                           : item.read
                             ? "bg-white"
-                            : "bg-blue-50/60"
+                            : "bg-[var(--color-primary-soft)]/50"
                       }`}
                     >
                       <span
                         className={`mt-1 h-2 w-2 shrink-0 rounded-full ${
-                          item.read ? "bg-slate-200" : "bg-[var(--color-primary)]"
+                          item.read ? "bg-transparent" : "bg-[var(--color-primary)]"
                         }`}
                       />
 
@@ -438,7 +438,7 @@ export default function Notification() {
                             {item.title}
                           </p>
                           {isAnnouncement ? (
-                            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-[0.14em] text-amber-700">
+                            <span className="rounded-full bg-[var(--color-primary-soft)] px-2 py-0.5 text-[0.7rem] font-semibold text-[var(--color-primary)]">
                               {formatAnnouncementCategory(
                                 typeof item.metadata === "object" &&
                                   item.metadata &&
@@ -450,7 +450,7 @@ export default function Notification() {
                             </span>
                           ) : null}
                           {isFreshAnnouncement ? (
-                            <span className="rounded-full bg-[var(--color-accent)] px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-[0.14em] text-white">
+                            <span className="rounded-full bg-[var(--color-accent)] px-2 py-0.5 text-[0.7rem] font-semibold text-white">
                               Baru
                             </span>
                           ) : null}
@@ -461,9 +461,6 @@ export default function Notification() {
                         <NotificationTimestamp createdAt={item.created_at} />
                       </div>
 
-                      <span className="shrink-0 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[0.65rem] font-semibold text-slate-500">
-                        {item.read ? "Lihat" : "Baca"}
-                      </span>
                     </button>
                   );
                 })()
@@ -472,8 +469,8 @@ export default function Notification() {
           </div>
 
           {visibleNotifications.length > 0 ? (
-            <div className="border-t border-slate-100 bg-slate-50/70 px-4 py-2.5 text-center text-xs text-slate-400">
-              Menampilkan {visibleNotifications.length} pemberitahuan terbaru
+            <div className="border-t border-[var(--color-line)] px-4 py-2.5 text-center text-xs text-slate-500">
+              {visibleNotifications.length} pemberitahuan terakhir
             </div>
           ) : null}
         </div>

@@ -18,7 +18,7 @@ const config = {
     border: "border-emerald-100",
     iconBg: "bg-emerald-100 text-emerald-600",
     progress: "bg-emerald-500",
-    ring: "shadow-[0_18px_40px_rgba(16,185,129,0.14)]",
+    ring: "border-l-emerald-500",
     label: "Sukses",
   },
   error: {
@@ -26,7 +26,7 @@ const config = {
     border: "border-rose-100",
     iconBg: "bg-rose-100 text-rose-600",
     progress: "bg-rose-500",
-    ring: "shadow-[0_18px_40px_rgba(244,63,94,0.14)]",
+    ring: "border-l-rose-500",
     label: "Gagal",
   },
   warning: {
@@ -34,7 +34,7 @@ const config = {
     border: "border-amber-100",
     iconBg: "bg-amber-100 text-amber-700",
     progress: "bg-amber-500",
-    ring: "shadow-[0_18px_40px_rgba(245,158,11,0.14)]",
+    ring: "border-l-amber-500",
     label: "Peringatan",
   },
 } as const;
@@ -113,36 +113,31 @@ export function ToastItem({
 
   return (
     <div
-      className={`relative w-full overflow-hidden rounded-[1.5rem] border bg-white/98 transition-all duration-300 ease-out ${currentStyle.border} ${currentStyle.ring} ${
+      role={type === "error" ? "alert" : "status"}
+      className={`relative w-full overflow-hidden rounded-lg border border-l-4 bg-white shadow-lg transition-all duration-200 ease-out ${currentStyle.border} ${currentStyle.ring} ${
         visible
           ? "translate-y-0 scale-100 opacity-100"
           : "translate-y-2 scale-[0.98] opacity-0"
       }`}
     >
-      <div className="flex items-start gap-3.5 p-4 sm:p-5">
+      <div className="flex items-start gap-3 p-3.5 sm:p-4">
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${currentStyle.iconBg}`}
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${currentStyle.iconBg}`}
         >
           <ToastIcon type={type} />
         </div>
 
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
-            <div>
-              <span
-                className={`inline-flex rounded-full px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-[0.16em] ${currentStyle.badge}`}
-              >
-                {currentStyle.label}
-              </span>
-              <p className="mt-2 text-[0.98rem] font-bold leading-5 text-slate-900">
-                {title}
-              </p>
-            </div>
+            <p className="pt-1 text-sm font-semibold leading-5 text-slate-900">
+              <span className="sr-only">{currentStyle.label}: </span>
+              {title}
+            </p>
 
             <button
               type="button"
               onClick={handleClose}
-              className="shrink-0 rounded-full p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+              className="-m-1.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700"
               aria-label="Tutup notifikasi"
             >
               <svg
@@ -160,11 +155,11 @@ export function ToastItem({
             </button>
           </div>
 
-          <p className="mt-2 text-sm leading-6 text-slate-500">{message}</p>
+          <p className="mt-1 text-sm leading-6 text-slate-600">{message}</p>
         </div>
       </div>
 
-      <div className="h-1 w-full bg-slate-100">
+      <div className="h-0.5 w-full bg-slate-100">
         <div
           className={`h-full ${currentStyle.progress} animate-[shrink_4s_linear_forwards]`}
         />
@@ -181,7 +176,7 @@ export function ToastContainer({
   onDismiss: (id: number) => void;
 }) {
   return (
-    <div className="pointer-events-none fixed inset-x-4 bottom-4 z-50 flex flex-col gap-3 sm:inset-x-auto sm:right-6 sm:top-24 sm:bottom-auto sm:w-full sm:max-w-[24rem]">
+    <div className="pointer-events-none fixed inset-x-4 bottom-4 z-50 flex flex-col gap-3 sm:inset-x-auto sm:right-6 sm:top-20 sm:bottom-auto sm:w-full sm:max-w-[24rem]">
       {toasts.map((toast) => (
         <div key={toast.id} className="pointer-events-auto">
           <ToastItem {...toast} onDismiss={onDismiss} />

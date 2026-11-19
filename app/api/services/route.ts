@@ -3,25 +3,25 @@ const services = [
     id: 1,
     title: "Ajukan Surat",
     description:
-      "Warga dapat mengajukan surat pengantar atau dokumen administrasi RT secara online melalui formulir yang terstruktur.",
+      "Isi formulir untuk surat domisili, keterangan usaha, keterangan tidak mampu, pengantar RT, atau keterangan umum.",
     detail:
-      "Alur pengajuan dibuat sederhana agar warga bisa mengirim data dengan cepat, sementara pengurus lebih mudah memeriksa kelengkapan berkas.",
+      "Nama, NIK, dan alamat terisi otomatis dari akun Anda. Periksa kembali, pilih jenis surat, lalu kirim.",
   },
   {
     id: 2,
     title: "Status Pengajuan",
     description:
-      "Setiap permohonan surat memiliki status yang dapat dipantau secara realtime sehingga warga mengetahui progres layanannya.",
+      "Lihat posisi setiap pengajuan: menunggu, diproses, selesai, atau ditolak.",
     detail:
-      "Fitur ini membantu transparansi proses layanan dan mengurangi pertanyaan berulang karena perkembangan pengajuan selalu tersedia.",
+      "Jika ditolak, catatan dari pengurus ditampilkan dan Anda bisa mengajukan ulang tanpa mengetik data dari awal.",
   },
   {
     id: 3,
     title: "Pengumuman RT",
     description:
-      "Informasi penting seperti jadwal rapat, kegiatan warga, dan pengumuman lingkungan ditampilkan dalam satu pusat informasi.",
+      "Baca informasi dari pengurus, seperti jadwal kerja bakti, rapat warga, atau pemberitahuan penting.",
     detail:
-      "Pengurus dapat menyampaikan informasi dengan cepat, sementara warga menerima kabar terbaru tanpa harus menunggu pemberitahuan manual.",
+      "Setiap pengumuman baru juga dikirim sebagai notifikasi ke akun Anda.",
   },
 ];
 

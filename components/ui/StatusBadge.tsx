@@ -1,9 +1,23 @@
 const statusStyles = {
-  diproses: "border-blue-200 bg-blue-100 text-blue-700",
-  ditolak: "border-red-200 bg-red-100 text-red-700",
-  pending: "border-amber-200 bg-amber-100 text-amber-700",
-  selesai: "border-emerald-200 bg-emerald-100 text-emerald-700",
+  diproses: "bg-blue-50 text-blue-800 ring-blue-200",
+  ditolak: "bg-red-50 text-red-700 ring-red-200",
+  pending: "bg-amber-50 text-amber-800 ring-amber-200",
+  selesai: "bg-emerald-50 text-emerald-800 ring-emerald-200",
 } as const;
+
+const dotStyles = {
+  diproses: "bg-blue-500",
+  ditolak: "bg-red-500",
+  pending: "bg-amber-500",
+  selesai: "bg-emerald-500",
+} as const;
+
+const statusLabels: Record<string, string> = {
+  diproses: "Diproses",
+  ditolak: "Ditolak",
+  pending: "Menunggu",
+  selesai: "Selesai",
+};
 
 function normalizeStatus(status: string) {
   const normalized = status.toLowerCase();
@@ -14,17 +28,22 @@ function normalizeStatus(status: string) {
   return normalized;
 }
 
+export function getStatusText(status: string) {
+  return statusLabels[normalizeStatus(status)] ?? status;
+}
+
 export function StatusBadge({ status }: { status: string }) {
   const normalizedStatus = normalizeStatus(status) as keyof typeof statusStyles;
   const className =
-    statusStyles[normalizedStatus] ??
-    "border-slate-200 bg-slate-100 text-slate-700";
+    statusStyles[normalizedStatus] ?? "bg-slate-50 text-slate-700 ring-slate-200";
+  const dotClassName = dotStyles[normalizedStatus] ?? "bg-slate-400";
 
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold capitalize shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] ${className}`}
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${className}`}
     >
-      {status}
+      <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${dotClassName}`} />
+      {getStatusText(status)}
     </span>
   );
 }

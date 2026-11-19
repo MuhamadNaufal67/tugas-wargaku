@@ -4,41 +4,32 @@ import { useState, type FormEvent } from "react";
 import { ToastContainer } from "@/components/Toast";
 import { useToast } from "@/hooks/useToast";
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent } from "@/components/ui/Card";
 
-const infoCards = [
-  {
-    title: "Email Layanan",
-    value: "halo@wargaku.id",
-    detail: "Untuk bantuan penggunaan aplikasi dan pertanyaan layanan warga.",
-  },
-  {
-    title: "Jam Pelayanan",
-    value: "08.00 - 17.00 WIB",
-    detail: "Waktu layanan utama untuk membantu pengajuan dan kebutuhan administrasi warga.",
-  },
-  {
-    title: "Kontak Pengurus",
-    value: "WhatsApp / Email",
-    detail: "Saluran yang memudahkan warga menghubungi pengurus lingkungan.",
-  },
+const contactDetails = [
+  { label: "Email", value: "halo@wargaku.id" },
+  { label: "Jam layanan", value: "08.00–17.00 WIB" },
 ];
 
 const faqs = [
   {
-    question: "Bagaimana jika saya butuh bantuan saat mengajukan surat?",
+    question: "Berapa lama surat saya diproses?",
     answer:
-      "Silakan hubungi pengurus atau petugas layanan melalui kontak yang tersedia. Tim akan membantu memeriksa data dan langkah yang perlu dilakukan.",
+      "Tergantung kesibukan pengurus. Anda bisa melihat posisinya kapan saja di halaman Status Pengajuan, dan akan mendapat notifikasi setiap kali statusnya berubah.",
   },
   {
-    question: "Apakah saya bisa memantau perkembangan pengajuan dari aplikasi?",
+    question: "Pengajuan saya ditolak. Apa yang harus dilakukan?",
     answer:
-      "Bisa. Setiap pengajuan memiliki status yang dapat dipantau, sehingga warga mengetahui apakah layanan sedang diperiksa, perlu perbaikan, atau sudah selesai.",
+      "Buka pengajuan tersebut di halaman Status Pengajuan untuk membaca catatan dari pengurus. Tekan Ajukan ulang, perbaiki datanya, lalu kirim kembali.",
   },
   {
-    question: "Bagaimana jika data pengajuan saya perlu diperbaiki?",
+    question: "Di mana saya mengambil suratnya?",
     answer:
-      "Jika pengajuan perlu diperbaiki, Anda akan menerima pemberitahuan beserta catatan yang membantu Anda melengkapi data sebelum mengajukan ulang.",
+      "Tidak perlu diambil. Setelah statusnya Selesai, tombol Unduh surat muncul dan surat bisa disimpan sebagai PDF lalu dicetak.",
+  },
+  {
+    question: "Data NIK saya salah saat mendaftar.",
+    answer:
+      "Anda bisa memperbaikinya langsung di formulir pengajuan. Data yang dikirim bersama pengajuan terakhir akan tersimpan ke akun Anda.",
   },
 ];
 
@@ -62,7 +53,7 @@ export default function ContactPage() {
     event.preventDefault();
 
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      showToast("warning", "Form belum lengkap", "Lengkapi nama, email, dan pesan terlebih dahulu.");
+      showToast("warning", "Formulir belum lengkap", "Isi nama, email, dan pesan terlebih dahulu.");
       return;
     }
 
@@ -77,8 +68,8 @@ export default function ContactPage() {
 
     showToast(
       "success",
-      "Pesan siap dikirim",
-      "Aplikasi email Anda akan terbuka untuk menghubungi pengurus atau petugas layanan.",
+      "Membuka aplikasi email",
+      "Pesan Anda sudah disiapkan. Tekan kirim di aplikasi email.",
     );
     setFormData({
       email: "",
@@ -89,103 +80,110 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <section className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-        <Card className="overflow-hidden bg-[linear-gradient(160deg,_#1f6ba5_0%,_#2d81c1_55%,_#69addf_100%)] text-white shadow-[0_20px_70px_rgba(31,107,165,0.24)]">
-          <CardContent className="space-y-5">
-            <span className="inline-flex rounded-full bg-white/16 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/84">
-              Bantuan Layanan
-            </span>
-            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
-              Butuh bantuan administrasi atau informasi layanan warga?
-            </h1>
-            <p className="max-w-xl text-base leading-8 text-white/82 sm:text-lg">
-              Gunakan form di samping untuk menghubungi pengurus atau petugas layanan terkait
-              pengajuan surat, informasi warga, atau bantuan penggunaan aplikasi.
-            </p>
-          </CardContent>
-        </Card>
+    <div className="space-y-12">
+      <header className="max-w-2xl">
+        <h1 className="page-title">Bantuan</h1>
+        <p className="page-lead">
+          Cari jawabannya di bawah, atau kirim pesan ke pengurus jika masih
+          ada yang belum jelas.
+        </p>
+      </header>
 
-        <Card>
-          <CardContent>
-            <h2 className="text-2xl font-bold text-slate-900">Kirim Pesan</h2>
-            <p className="mt-2 text-sm leading-7 text-slate-500">
-              Pesan akan diarahkan ke aplikasi email Anda agar dapat langsung dikirim.
-            </p>
-            <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
-              <div>
-                <label htmlFor="name" className="mb-2 block text-sm font-semibold text-slate-700">
-                  Nama
-                </label>
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  value={formData.name}
-                  onChange={(event) => updateField("name", event.target.value)}
-                  placeholder="Masukkan nama Anda"
-                  className="w-full rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-3.5 text-slate-900 outline-none transition focus:border-[var(--color-primary)] focus:bg-white"
-                />
+      <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+        <section aria-labelledby="faq-title">
+          <h2 id="faq-title" className="section-title">
+            Pertanyaan yang sering diajukan
+          </h2>
+          <div className="mt-4 divide-y divide-[var(--color-line)] rounded-xl border border-[var(--color-line)] bg-white">
+            {faqs.map((item) => (
+              <details key={item.question} className="group px-4 sm:px-5">
+                <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-3 text-sm font-semibold text-slate-900 [&::-webkit-details-marker]:hidden">
+                  {item.question}
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 20 20"
+                    className="h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-180"
+                    fill="currentColor"
+                  >
+                    <path d="M5.2 7.2a1 1 0 0 1 1.4 0L10 10.6l3.4-3.4a1 1 0 1 1 1.4 1.4l-4.1 4.1a1 1 0 0 1-1.4 0L5.2 8.6a1 1 0 0 1 0-1.4Z" />
+                  </svg>
+                </summary>
+                <p className="pb-4 text-sm leading-6 text-slate-600">{item.answer}</p>
+              </details>
+            ))}
+          </div>
+
+          <dl className="mt-6 grid gap-4 sm:grid-cols-2">
+            {contactDetails.map((item) => (
+              <div key={item.label}>
+                <dt className="text-sm text-slate-500">{item.label}</dt>
+                <dd className="mt-0.5 text-sm font-semibold text-slate-900">{item.value}</dd>
               </div>
-              <div>
-                <label htmlFor="email" className="mb-2 block text-sm font-semibold text-slate-700">
-                  Email
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(event) => updateField("email", event.target.value)}
-                  placeholder="Masukkan email Anda"
-                  className="w-full rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-3.5 text-slate-900 outline-none transition focus:border-[var(--color-primary)] focus:bg-white"
-                />
-              </div>
-              <div>
-                <label htmlFor="message" className="mb-2 block text-sm font-semibold text-slate-700">
-                  Pesan
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  rows={6}
-                  value={formData.message}
-                  onChange={(event) => updateField("message", event.target.value)}
-                  placeholder="Tulis pesan Anda"
-                  className="w-full rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-3.5 text-slate-900 outline-none transition focus:border-[var(--color-primary)] focus:bg-white"
-                />
-              </div>
+            ))}
+          </dl>
+        </section>
 
-              <Button type="submit" disabled={isSubmitting} variant="primary">
-                {isSubmitting ? "Memproses..." : "Kirim Pesan"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </section>
+        <section
+          aria-labelledby="message-title"
+          className="rounded-xl border border-[var(--color-line)] bg-white p-5 sm:p-6"
+        >
+          <h2 id="message-title" className="section-title">
+            Kirim pesan
+          </h2>
+          <p className="section-lead">
+            Pesan akan dibuka di aplikasi email Anda.
+          </p>
+          <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
+            <div>
+              <label htmlFor="name" className="label">
+                Nama
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                autoComplete="name"
+                value={formData.name}
+                onChange={(event) => updateField("name", event.target.value)}
+                className="input"
+              />
+            </div>
+            <div>
+              <label htmlFor="email" className="label">
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                inputMode="email"
+                value={formData.email}
+                onChange={(event) => updateField("email", event.target.value)}
+                placeholder="nama@email.com"
+                className="input"
+              />
+            </div>
+            <div>
+              <label htmlFor="message" className="label">
+                Pesan
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                rows={5}
+                value={formData.message}
+                onChange={(event) => updateField("message", event.target.value)}
+                className="input"
+              />
+            </div>
 
-      <section className="grid gap-4 md:grid-cols-3">
-        {infoCards.map((item) => (
-          <Card key={item.title}>
-            <CardContent>
-              <p className="text-sm font-semibold text-slate-500">{item.title}</p>
-              <p className="mt-2 text-xl font-extrabold text-slate-950">{item.value}</p>
-              <p className="mt-2 text-sm leading-6 text-slate-500">{item.detail}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </section>
-
-      <section className="grid gap-4 lg:grid-cols-3">
-        {faqs.map((item) => (
-          <Card key={item.question}>
-            <CardContent>
-              <h2 className="text-lg font-bold text-slate-900">{item.question}</h2>
-              <p className="mt-3 text-sm leading-7 text-slate-500">{item.answer}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </section>
+            <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
+              {isSubmitting ? "Membuka email…" : "Kirim pesan"}
+            </Button>
+          </form>
+        </section>
+      </div>
 
       <ToastContainer toasts={toasts} onDismiss={dismiss} />
     </div>

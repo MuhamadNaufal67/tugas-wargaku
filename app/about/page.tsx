@@ -1,98 +1,84 @@
-import { Card, CardContent } from "@/components/ui/Card";
+import { LinkButton } from "@/components/ui/Button";
 
-const tujuanItems = [
-  "Memodernisasi layanan administrasi tingkat RT agar lebih cepat, terdokumentasi, dan mudah dipantau.",
-  "Mengurangi proses manual yang rawan antrean, salah catat, dan duplikasi pertanyaan dari warga.",
-  "Menyediakan pengalaman digital yang tetap sederhana bagi warga, namun tetap memudahkan pengurus dalam melayani.",
-];
-
-const benefitItems = [
-  "Pengajuan surat lebih tertib dari sisi data, status, dan histori perubahan.",
-  "Warga memperoleh transparansi progres layanan tanpa harus menunggu kabar manual.",
-  "Pengurus RT memiliki kendali yang lebih rapi atas status layanan, catatan perbaikan, pemberitahuan, dan penyelesaian surat.",
-];
-
-const values = [
+const problems = [
   {
-    title: "Rapi",
-    description: "Semua proses tersusun dari form, status, alasan penolakan, hingga download surat jadi.",
+    title: "Antre dan bolak-balik",
+    description:
+      "Warga harus datang ke rumah pengurus, kadang lebih dari sekali, hanya untuk satu surat pengantar.",
   },
   {
-    title: "Jelas",
-    description: "Setiap perubahan status disertai notifikasi dan jalur tindak lanjut yang mudah dipahami.",
+    title: "Tidak tahu progresnya",
+    description:
+      "Setelah berkas diserahkan, warga tidak tahu apakah suratnya sedang diproses atau ada data yang kurang.",
   },
   {
-    title: "Mudah Dipakai",
-    description: "Bahasa, alur, dan tampilan dirancang agar terasa akrab bagi warga dan tetap efisien bagi pengurus.",
+    title: "Catatan tercecer",
+    description:
+      "Pengurus mencatat pengajuan di buku atau chat, sehingga sulit dicari ketika dibutuhkan lagi.",
+  },
+];
+
+const answers = [
+  {
+    title: "Pengajuan online",
+    description: "Formulir surat bisa diisi kapan saja dari ponsel, dengan data diri yang sudah tersimpan di akun.",
+  },
+  {
+    title: "Status yang jelas",
+    description:
+      "Setiap pengajuan punya status: menunggu, diproses, selesai, atau ditolak dengan catatan perbaikan.",
+  },
+  {
+    title: "Surat langsung jadi",
+    description: "Saat pengurus menyelesaikan pengajuan, surat PDF dibuat otomatis dan bisa diunduh warga.",
   },
 ];
 
 export default function AboutPage() {
   return (
-    <div className="space-y-6">
-      <section className="rounded-[2rem] border border-white/80 bg-white/92 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-8 lg:p-10">
-        <span className="inline-flex rounded-full bg-[var(--color-primary-soft)] px-4 py-2 text-sm font-semibold text-[var(--color-primary)]">
-          Tentang WargaKu
-        </span>
-        <h1 className="mt-5 max-w-4xl text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">
-          Platform administrasi RT digital yang dirancang agar layanan warga lebih cepat, transparan, dan siap tumbuh.
-        </h1>
-        <p className="mt-6 max-w-4xl text-base leading-8 text-slate-600 sm:text-lg">
-          WargaKu menghadirkan pengajuan surat, pemantauan proses, pemberitahuan otomatis,
-          catatan perbaikan yang jelas, dan unduhan surat selesai dalam satu pengalaman yang modern
-          namun tetap mudah digunakan.
+    <div className="space-y-12">
+      <header className="max-w-2xl">
+        <h1 className="page-title">Tentang WargaKu</h1>
+        <p className="page-lead">
+          WargaKu adalah aplikasi administrasi untuk satu lingkungan RT. Tujuannya
+          sederhana: membuat urusan surat-menyurat antara warga dan pengurus
+          lebih cepat dan bisa dipantau.
         </p>
+      </header>
+
+      <section className="grid gap-10 lg:grid-cols-2">
+        <div>
+          <h2 className="section-title">Masalah yang ingin diselesaikan</h2>
+          <dl className="mt-4 space-y-5">
+            {problems.map((item) => (
+              <div key={item.title}>
+                <dt className="text-sm font-semibold text-slate-900">{item.title}</dt>
+                <dd className="mt-1 text-sm leading-6 text-slate-600">{item.description}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        <div className="rounded-xl border border-[var(--color-line)] bg-white p-5 sm:p-6">
+          <h2 className="section-title">Yang dilakukan WargaKu</h2>
+          <dl className="mt-4 space-y-5">
+            {answers.map((item) => (
+              <div key={item.title} className="border-l-2 border-[var(--color-primary)] pl-4">
+                <dt className="text-sm font-semibold text-slate-900">{item.title}</dt>
+                <dd className="mt-1 text-sm leading-6 text-slate-600">{item.description}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardContent className="space-y-4">
-            <h2 className="text-2xl font-bold text-slate-900">Tujuan</h2>
-            <div className="space-y-3">
-              {tujuanItems.map((item, index) => (
-                <article
-                  key={item}
-                  className="flex items-start gap-4 rounded-[1.4rem] border border-slate-200 bg-slate-50/80 p-4"
-                >
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-primary-soft)] text-sm font-bold text-[var(--color-primary)]">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <p className="text-sm leading-7 text-slate-600 sm:text-base">{item}</p>
-                </article>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="space-y-4">
-            <h2 className="text-2xl font-bold text-slate-900">Manfaat</h2>
-            <div className="space-y-3">
-              {benefitItems.map((item, index) => (
-                <article
-                  key={item}
-                  className="flex items-start gap-4 rounded-[1.4rem] border border-orange-100 bg-[linear-gradient(135deg,_#fff4ea_0%,_#ffffff_60%)] p-4"
-                >
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-sm font-bold text-orange-500">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <p className="text-sm leading-7 text-slate-600 sm:text-base">{item}</p>
-                </article>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-
-      <section className="grid gap-4 md:grid-cols-3">
-        {values.map((item) => (
-          <Card key={item.title}>
-            <CardContent>
-              <p className="text-2xl font-extrabold text-slate-950">{item.title}</p>
-              <p className="mt-3 text-sm leading-7 text-slate-500">{item.description}</p>
-            </CardContent>
-          </Card>
-        ))}
+      <section className="flex flex-col gap-4 rounded-xl bg-[var(--color-primary-soft)] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <p className="text-sm font-medium text-slate-800 sm:text-base">
+          Sudah punya akun warga? Langsung ajukan surat pertama Anda.
+        </p>
+        <LinkButton href="/ajukan-surat" variant="accent">
+          Ajukan surat
+        </LinkButton>
       </section>
     </div>
   );

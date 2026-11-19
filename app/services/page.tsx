@@ -1,6 +1,5 @@
-import Image from "next/image";
 import { headers } from "next/headers";
-import { Card, CardContent } from "@/components/ui/Card";
+import Link from "next/link";
 import { LinkButton } from "@/components/ui/Button";
 
 type ServiceItem = {
@@ -10,15 +9,10 @@ type ServiceItem = {
   detail: string;
 };
 
-const serviceImages: Record<number, { src: string; alt: string }> = {
-  1: {
-    src: "/HI-FI%20Ajukan%20Surat%201.png",
-    alt: "Tampilan fitur Ajukan Surat",
-  },
-  2: {
-    src: "/HI-FI%20Status%20Pengajuan%20Surat.png",
-    alt: "Tampilan fitur Status Pengajuan",
-  },
+const serviceLinks: Record<number, { href: string; label: string }> = {
+  1: { href: "/ajukan-surat", label: "Buka formulir" },
+  2: { href: "/status", label: "Cek status" },
+  3: { href: "/pengumuman", label: "Baca pengumuman" },
 };
 
 async function getServices() {
@@ -47,59 +41,47 @@ export default async function ServicesPage() {
   const services = await getServices();
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-[2rem] border border-white/80 bg-white/92 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-8 lg:p-10">
-        <span className="inline-flex rounded-full bg-[var(--color-primary-soft)] px-4 py-2 text-sm font-semibold text-[var(--color-primary)]">
-          Layanan Utama
-        </span>
-        <h1 className="mt-5 max-w-4xl text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">
-          Layanan inti WargaKu untuk membantu administrasi RT/RW berjalan lebih cepat dan tertata.
-        </h1>
-        <p className="mt-6 max-w-3xl text-base leading-8 text-slate-600 sm:text-lg">
-          Setiap layanan dirancang sebagai satu alur yang utuh, mulai dari pengajuan,
-          pemantauan proses, pemberitahuan otomatis, catatan perbaikan, hingga surat selesai yang siap diunduh.
+    <div className="space-y-10">
+      <header className="max-w-2xl">
+        <h1 className="page-title">Layanan</h1>
+        <p className="page-lead">
+          Tiga layanan yang bisa dipakai warga setelah masuk ke akun. Semuanya
+          bisa dibuka dari ponsel.
         </p>
-        <div className="mt-6 flex flex-wrap gap-3">
-          <LinkButton href="/dashboard">Lihat Akun Warga</LinkButton>
-          <LinkButton href="/admin" variant="secondary">
-            Lihat Panel Pengurus
-          </LinkButton>
-        </div>
+      </header>
+
+      <section className="grid gap-4 md:grid-cols-3">
+        {services.map((service) => {
+          const link = serviceLinks[service.id];
+
+          return (
+            <article
+              key={service.id}
+              className="flex flex-col rounded-xl border border-[var(--color-line)] bg-white p-5 sm:p-6"
+            >
+              <h2 className="section-title">{service.title}</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-700">{service.description}</p>
+              <p className="mt-3 flex-1 text-sm leading-6 text-slate-500">{service.detail}</p>
+              {link ? (
+                <Link href={link.href} className="text-link mt-5 inline-flex min-h-11 items-center text-sm">
+                  {link.label}
+                </Link>
+              ) : null}
+            </article>
+          );
+        })}
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {services.map((service, index) => (
-          <Card key={service.id}>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--color-primary-soft)] text-lg font-extrabold text-[var(--color-primary)]">
-                  0{index + 1}
-                </span>
-                <span className="rounded-full bg-[#fff2e8] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-[var(--color-accent)]">
-                  Layanan
-                </span>
-              </div>
-              <h2 className="mt-6 text-2xl font-bold text-slate-900">{service.title}</h2>
-              {serviceImages[service.id] ? (
-                <div className="mt-5 overflow-hidden rounded-[1.25rem] border border-slate-200 bg-slate-50 p-2">
-                  <Image
-                    src={serviceImages[service.id].src}
-                    alt={serviceImages[service.id].alt}
-                    width={640}
-                    height={360}
-                    className="h-auto max-h-40 w-full rounded-[0.9rem] object-contain"
-                  />
-                </div>
-              ) : null}
-              <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base">
-                {service.description}
-              </p>
-              <div className="mt-6 rounded-[1.5rem] bg-slate-50 p-4">
-                <p className="text-sm leading-7 text-slate-600">{service.detail}</p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      <section className="flex flex-col gap-4 rounded-xl border border-[var(--color-line)] bg-white p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div>
+          <p className="font-semibold text-slate-900">Belum punya akun?</p>
+          <p className="mt-1 text-sm text-slate-500">
+            Pendaftaran hanya butuh email, NIK, dan alamat.
+          </p>
+        </div>
+        <LinkButton href="/login?mode=register" variant="primary">
+          Daftar sebagai warga
+        </LinkButton>
       </section>
     </div>
   );

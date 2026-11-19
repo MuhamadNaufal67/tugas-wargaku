@@ -84,14 +84,6 @@ function validateField(name: keyof FormErrors, value: string) {
   return "";
 }
 
-function getInputClassName(hasError: boolean) {
-  return `w-full rounded-2xl bg-slate-50 px-4 py-3.5 text-slate-900 outline-none transition focus:bg-white ${
-    hasError
-      ? "border border-red-300 focus:border-red-500"
-      : "border border-slate-200 focus:border-[var(--color-primary)]"
-  }`;
-}
-
 function readReapplyDraft() {
   if (typeof window === "undefined") {
     return null;
@@ -347,59 +339,77 @@ function AjukanSuratForm({ profile }: { profile: ProfileRow | null }) {
   }
 
   return (
-    <section className="flex flex-1 items-center justify-center">
-      <div className="w-full max-w-3xl rounded-[2.5rem] border border-white/80 bg-white/95 p-8 shadow-[0_22px_60px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:p-10">
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="inline-flex rounded-full bg-[var(--color-primary-soft)] px-4 py-2 text-sm font-semibold text-[var(--color-primary)]">
-            Form Pengajuan Surat
-          </span>
-          <h1 className="mt-5 text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">
-            Ajukan surat secara digital dengan akun warga Anda.
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-10">
+      <section>
+        <header>
+          <h1 className="page-title">
+            {reapplySourceId ? "Ajukan ulang surat" : "Ajukan surat"}
           </h1>
-          <p className="mt-4 text-base leading-8 text-slate-600 sm:text-lg">
-            Data akun Anda membantu mempercepat pengisian formulir dan menjaga
-            proses pengajuan tetap rapi, aman, dan mudah ditelusuri.
+          <p className="page-lead">
+            Data diri sudah diisi dari akun Anda. Periksa kembali, pilih jenis
+            surat, lalu kirim.
           </p>
-        </div>
+        </header>
 
         {reapplySourceId ? (
-          <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-            Anda sedang mengajukan ulang surat yang sebelumnya ditolak. Data
-            lama sudah dimuat otomatis, silakan periksa kembali sebelum kirim.
+          <div role="status" className="mt-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+            Data dari pengajuan yang ditolak sudah dimuat. Perbaiki bagian yang
+            disebut dalam catatan pengurus sebelum mengirim ulang.
           </div>
         ) : null}
 
-        <form className="mt-10 space-y-6" onSubmit={handleSubmit}>
-          <div className="grid gap-6 md:grid-cols-2">
+        <form
+          className="mt-6 space-y-5 rounded-xl border border-[var(--color-line)] bg-white p-5 sm:p-7"
+          onSubmit={handleSubmit}
+          noValidate
+        >
+          <div>
+            <label htmlFor="jenis_surat" className="label">
+              Jenis surat
+            </label>
+            <select
+              id="jenis_surat"
+              name="jenis_surat"
+              value={formData.jenis_surat}
+              onChange={handleChange}
+              className="input"
+              aria-invalid={Boolean(fieldErrors.jenis_surat)}
+            >
+              <option value="">Pilih jenis surat</option>
+              {jenisSuratOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+            {fieldErrors.jenis_surat ? (
+              <p className="field-error">{fieldErrors.jenis_surat}</p>
+            ) : null}
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
             <div>
-              <label
-                htmlFor="nama"
-                className="mb-2 block text-sm font-semibold text-slate-700"
-              >
-                Nama
+              <label htmlFor="nama" className="label">
+                Nama lengkap
               </label>
               <input
                 id="nama"
                 name="nama"
                 type="text"
+                autoComplete="name"
                 value={formData.nama}
                 onChange={handleChange}
-                className={getInputClassName(Boolean(fieldErrors.nama))}
-                placeholder="Masukkan nama lengkap"
+                className="input"
+                placeholder="Sesuai KTP"
                 aria-invalid={Boolean(fieldErrors.nama)}
               />
               {fieldErrors.nama ? (
-                <p className="mt-2 text-xs font-medium text-red-600">
-                  {fieldErrors.nama}
-                </p>
+                <p className="field-error">{fieldErrors.nama}</p>
               ) : null}
             </div>
 
             <div>
-              <label
-                htmlFor="nik"
-                className="mb-2 block text-sm font-semibold text-slate-700"
-              >
+              <label htmlFor="nik" className="label">
                 NIK
               </label>
               <input
@@ -408,132 +418,115 @@ function AjukanSuratForm({ profile }: { profile: ProfileRow | null }) {
                 type="text"
                 value={formData.nik}
                 onChange={handleChange}
-                className={getInputClassName(Boolean(fieldErrors.nik))}
-                placeholder="Masukkan NIK"
+                className="input tabular-nums"
+                placeholder="16 digit angka"
                 aria-invalid={Boolean(fieldErrors.nik)}
                 maxLength={NIK_LENGTH}
                 inputMode="numeric"
                 pattern="[0-9]*"
               />
               {fieldErrors.nik ? (
-                <p className="mt-2 text-xs font-medium text-red-600">
-                  {fieldErrors.nik}
+                <p className="field-error">{fieldErrors.nik}</p>
+              ) : (
+                <p className="field-hint">
+                  {formData.nik.length}/{NIK_LENGTH} digit
                 </p>
-              ) : formData.nik.length > 0 && formData.nik.length < NIK_LENGTH ? (
-                <p className="mt-2 text-xs font-medium text-amber-600">
-                  NIK harus terdiri dari {NIK_LENGTH} digit.
-                </p>
-              ) : null}
+              )}
             </div>
           </div>
 
           <div>
-            <label
-              htmlFor="alamat"
-              className="mb-2 block text-sm font-semibold text-slate-700"
-            >
+            <label htmlFor="alamat" className="label">
               Alamat
             </label>
             <textarea
               id="alamat"
               name="alamat"
-              rows={4}
+              rows={3}
+              autoComplete="street-address"
               value={formData.alamat}
               onChange={handleChange}
-              className={getInputClassName(Boolean(fieldErrors.alamat))}
-              placeholder="Masukkan alamat lengkap"
+              className="input"
+              placeholder="Nama jalan, nomor rumah, RT/RW"
               aria-invalid={Boolean(fieldErrors.alamat)}
             />
             {fieldErrors.alamat ? (
-              <p className="mt-2 text-xs font-medium text-red-600">
-                {fieldErrors.alamat}
-              </p>
+              <p className="field-error">{fieldErrors.alamat}</p>
             ) : null}
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            <div>
-              <label
-                htmlFor="jenis_surat"
-                className="mb-2 block text-sm font-semibold text-slate-700"
-              >
-                Jenis Surat
-              </label>
-              <select
-                id="jenis_surat"
-                name="jenis_surat"
-                value={formData.jenis_surat}
-                onChange={handleChange}
-                className={getInputClassName(Boolean(fieldErrors.jenis_surat))}
-                aria-invalid={Boolean(fieldErrors.jenis_surat)}
-              >
-                <option value="">Pilih jenis surat</option>
-                {jenisSuratOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-              {fieldErrors.jenis_surat ? (
-                <p className="mt-2 text-xs font-medium text-red-600">
-                  {fieldErrors.jenis_surat}
-                </p>
-              ) : null}
-            </div>
-
-            <div>
-              <label
-                htmlFor="dokumen"
-                className="mb-2 block text-sm font-semibold text-slate-700"
-              >
-                Dokumen Pendukung
-              </label>
-              <input
-                ref={fileInputRef}
-                id="dokumen"
-                name="dokumen"
-                type="file"
-                onChange={handleFileChange}
-                className="block w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-[var(--color-primary-soft)] file:px-4 file:py-2 file:font-semibold file:text-[var(--color-primary)] hover:file:bg-[#d8ebfb]"
-              />
-              <p className="mt-2 text-xs text-slate-500">
-                Lampiran membantu pengurus memeriksa kebutuhan pengajuan dengan lebih cepat.
-              </p>
-            </div>
+          <div>
+            <label htmlFor="dokumen" className="label">
+              Dokumen pendukung <span className="font-normal text-slate-500">(opsional)</span>
+            </label>
+            <input
+              ref={fileInputRef}
+              id="dokumen"
+              name="dokumen"
+              type="file"
+              onChange={handleFileChange}
+              className="block w-full rounded-lg border border-dashed border-[var(--color-line)] bg-white p-2 text-sm text-slate-600 file:mr-3 file:min-h-9 file:rounded-md file:border-0 file:bg-[var(--color-primary-soft)] file:px-3 file:text-sm file:font-semibold file:text-[var(--color-primary)] hover:file:bg-[var(--brand-200)]"
+            />
+            <p className="field-hint">
+              Hanya nama file yang dicatat. Siapkan dokumen aslinya jika
+              pengurus memintanya.
+            </p>
           </div>
 
           {errorMessage ? (
-            <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">
               {errorMessage}
             </div>
           ) : null}
 
-          <div className="flex flex-wrap justify-center gap-4 pt-2">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="rounded-full bg-[var(--color-accent)] px-6 py-3.5 text-sm font-bold text-white shadow-[0_16px_35px_rgba(255,138,61,0.28)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {isSubmitting
-                ? "Mengirim..."
-                : reapplySourceId
-                  ? "Kirim Ulang Pengajuan"
-                  : "Kirim Pengajuan"}
-            </button>
+          <div className="flex flex-col-reverse gap-3 border-t border-[var(--color-line)] pt-5 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={resetForm}
               disabled={isSubmitting}
-              className="rounded-full border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-700 transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-70"
+              className="min-h-11 rounded-lg border border-[var(--color-line)] bg-white px-5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Reset
+              Atur ulang
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="min-h-11 rounded-lg bg-[var(--color-accent)] px-5 text-sm font-semibold text-white hover:bg-[var(--color-accent-strong)] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {isSubmitting
+                ? "Mengirim…"
+                : reapplySourceId
+                  ? "Kirim ulang pengajuan"
+                  : "Kirim pengajuan"}
             </button>
           </div>
         </form>
-      </div>
+      </section>
+
+      <aside className="space-y-4 text-sm leading-6 text-slate-600 lg:pt-24">
+        <h2 className="text-sm font-bold text-slate-900">Setelah dikirim</h2>
+        <ol className="space-y-3">
+          <li>
+            <span className="font-semibold text-slate-800">Menunggu.</span>{" "}
+            Pengajuan masuk ke daftar pengurus RT.
+          </li>
+          <li>
+            <span className="font-semibold text-slate-800">Diproses.</span>{" "}
+            Pengurus sedang memeriksa data Anda.
+          </li>
+          <li>
+            <span className="font-semibold text-slate-800">Selesai.</span>{" "}
+            Surat PDF bisa diunduh dari halaman Status Pengajuan.
+          </li>
+        </ol>
+        <p>
+          Jika ada data yang kurang, pengajuan akan dikembalikan dengan catatan
+          dan Anda bisa mengajukan ulang.
+        </p>
+      </aside>
 
       <ToastContainer toasts={toasts} onDismiss={dismiss} />
-    </section>
+    </div>
   );
 }
 
@@ -549,23 +542,11 @@ export default function AjukanSuratPage() {
 
   if (isLoading) {
     return (
-      <section className="flex flex-1 items-center justify-center">
-        <div className="w-full max-w-3xl rounded-[2rem] border border-white/80 bg-white/95 p-6 shadow-sm sm:p-8">
-          <div className="animate-pulse space-y-6">
-            <div className="mx-auto h-5 w-32 rounded-full bg-slate-200" />
-            <div className="mx-auto h-10 w-3/4 rounded-2xl bg-slate-200" />
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="h-16 rounded-[1.4rem] bg-slate-100" />
-              <div className="h-16 rounded-[1.4rem] bg-slate-100" />
-            </div>
-            <div className="h-36 rounded-[1.6rem] bg-slate-100" />
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="h-16 rounded-[1.4rem] bg-slate-100" />
-              <div className="h-16 rounded-[1.4rem] bg-slate-100" />
-            </div>
-          </div>
-        </div>
-      </section>
+      <div aria-busy="true" aria-label="Memuat formulir" className="max-w-2xl animate-pulse space-y-4">
+        <div className="h-8 w-48 rounded-md bg-slate-200" />
+        <div className="h-4 w-80 max-w-full rounded bg-slate-200" />
+        <div className="h-96 rounded-xl border border-[var(--color-line)] bg-white" />
+      </div>
     );
   }
 
@@ -575,25 +556,21 @@ export default function AjukanSuratPage() {
 
   if (isAdmin) {
     return (
-      <section className="flex flex-1 items-center justify-center">
-        <div className="w-full max-w-2xl rounded-[2rem] border border-amber-200 bg-white p-8 shadow-sm">
-          <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-amber-700">
-            Akses Warga
-          </span>
-          <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-950">
-            Halaman ini ditujukan untuk akun warga.
-          </h1>
-          <p className="mt-3 text-sm leading-7 text-slate-600">
-            Anda sedang masuk sebagai pengurus. Untuk meninjau atau memperbarui layanan warga, gunakan halaman status pengajuan.
-          </p>
-          <button
-            type="button"
-            onClick={() => router.push("/status")}
-            className="mt-6 rounded-full bg-[var(--color-primary)] px-5 py-3 text-sm font-semibold text-white"
-          >
-            Buka Status Pengajuan
-          </button>
-        </div>
+      <section className="mx-auto max-w-lg py-10 text-center">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          Formulir ini untuk akun warga
+        </h1>
+        <p className="mt-3 text-sm leading-6 text-slate-600">
+          Anda masuk sebagai pengurus. Untuk memeriksa dan memproses pengajuan
+          warga, buka halaman Kelola Pengajuan.
+        </p>
+        <button
+          type="button"
+          onClick={() => router.push("/status")}
+          className="mt-6 min-h-11 rounded-lg bg-[var(--color-primary)] px-5 text-sm font-semibold text-white hover:bg-[var(--color-primary-strong)]"
+        >
+          Buka Kelola Pengajuan
+        </button>
       </section>
     );
   }

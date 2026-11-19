@@ -275,117 +275,78 @@ export default function LoginPage() {
     }
   }
 
-  function getInputClassName(hasError: boolean) {
-    return `w-full rounded-2xl bg-slate-50 px-4 py-3.5 text-slate-900 outline-none transition focus:bg-white ${
-      hasError
-        ? "border border-red-300 focus:border-red-500"
-        : "border border-slate-200 focus:border-[var(--color-primary)]"
-    }`;
+  function renderError(key: keyof FormState) {
+    const message = fieldErrors[key];
+    return message ? (
+      <p id={`${key}-error`} className="field-error">
+        {message}
+      </p>
+    ) : null;
   }
 
   return (
-    <section className="flex flex-1 items-center justify-center">
-      <div className="grid w-full max-w-6xl gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-[2.5rem] border border-white/80 bg-[linear-gradient(145deg,rgba(45,129,193,0.12),rgba(255,255,255,0.92)_55%,rgba(255,138,61,0.1))] p-8 shadow-[0_24px_70px_rgba(15,23,42,0.08)] sm:p-10">
-          <span className="inline-flex rounded-full bg-white/80 px-4 py-2 text-sm font-semibold text-[var(--color-primary)]">
-            Akun WargaKu
-          </span>
-          <h1 className="mt-5 max-w-xl text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">
-            Akses akun warga dan pengurus yang aman dalam satu aplikasi layanan.
+    <section className="flex flex-1 items-start justify-center sm:items-center">
+      <div className="w-full max-w-md">
+        <div className="mb-6 text-center">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            {mode === "login" ? "Masuk ke WargaKu" : "Daftar akun warga"}
           </h1>
-          <p className="mt-4 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
-            Warga dapat melihat pengajuan miliknya sendiri, menerima pemberitahuan,
-            mengunduh surat yang selesai, dan mengajukan ulang jika diperlukan.
-            Pengurus mengelola seluruh proses layanan dari panel yang sama.
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            {mode === "login"
+              ? "Masuk untuk mengajukan surat dan melihat status pengajuan Anda."
+              : "Data diri Anda akan dipakai untuk mengisi formulir surat secara otomatis."}
           </p>
-
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            {[
-              "Akses akun warga dan pengurus yang aman",
-              "Hak akses warga dan pengurus terkelola dengan baik",
-              "Riwayat pengajuan tersimpan rapi dan pribadi",
-              "Pemberitahuan otomatis dan unduhan surat PDF",
-            ].map((item) => (
-              <div
-                key={item}
-                className="rounded-2xl border border-white/80 bg-white/70 p-4 text-sm font-medium text-slate-600 backdrop-blur-sm"
-              >
-                {item}
-              </div>
-            ))}
-          </div>
         </div>
 
-        <div className="w-full rounded-[2.25rem] border border-white/80 bg-white/95 p-8 shadow-[0_22px_60px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:p-10">
-          <div className="flex rounded-full bg-slate-100 p-1">
-            <button
-              type="button"
-              onClick={() => switchMode("login")}
-              className={`flex-1 rounded-full px-4 py-2.5 text-sm font-semibold transition ${
-                mode === "login"
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-500"
-              }`}
-            >
-              Masuk
-            </button>
-            <button
-              type="button"
-              onClick={() => switchMode("register")}
-              className={`flex-1 rounded-full px-4 py-2.5 text-sm font-semibold transition ${
-                mode === "register"
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-500"
-              }`}
-            >
-              Daftar
-            </button>
+        <div className="rounded-xl border border-[var(--color-line)] bg-white p-5 sm:p-7">
+          <div
+            role="tablist"
+            aria-label="Pilih masuk atau daftar"
+            className="grid grid-cols-2 rounded-lg bg-slate-100 p-1"
+          >
+            {(["login", "register"] as const).map((value) => (
+              <button
+                key={value}
+                type="button"
+                role="tab"
+                aria-selected={mode === value}
+                onClick={() => switchMode(value)}
+                className={`min-h-10 rounded-md text-sm font-semibold ${
+                  mode === value
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                {value === "login" ? "Masuk" : "Daftar"}
+              </button>
+            ))}
           </div>
 
-          <div className="mt-6">
-            <h2 className="text-3xl font-extrabold tracking-tight text-slate-950">
-              {mode === "login" ? "Masuk ke akun Anda" : "Buat akun warga"}
-            </h2>
-            <p className="mt-2 text-sm leading-7 text-slate-500">
-              {mode === "login"
-                ? "Gunakan email dan kata sandi Anda untuk melanjutkan."
-                : "Daftarkan akun warga untuk mulai mengajukan surat dan memantau proses layanan."}
-            </p>
-          </div>
-
-          <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+          <form className="mt-6 space-y-4" onSubmit={handleSubmit} noValidate>
             {mode === "register" ? (
               <>
                 <div>
-                  <label
-                    htmlFor="fullName"
-                    className="mb-2 block text-sm font-semibold text-slate-700"
-                  >
-                    Nama Lengkap
+                  <label htmlFor="fullName" className="label">
+                    Nama lengkap
                   </label>
                   <input
                     id="fullName"
                     name="fullName"
                     type="text"
+                    autoComplete="name"
                     value={formData.fullName}
                     onChange={(event) =>
                       updateField("fullName", event.target.value)
                     }
-                    className={getInputClassName(Boolean(fieldErrors.fullName))}
-                    placeholder="Masukkan nama lengkap"
+                    className="input"
+                    aria-invalid={Boolean(fieldErrors.fullName)}
+                    placeholder="Sesuai KTP"
                   />
-                  {fieldErrors.fullName ? (
-                    <p className="mt-2 text-xs font-medium text-red-600">
-                      {fieldErrors.fullName}
-                    </p>
-                  ) : null}
+                  {renderError("fullName")}
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="nik"
-                    className="mb-2 block text-sm font-semibold text-slate-700"
-                  >
+                  <label htmlFor="nik" className="label">
                     NIK
                   </label>
                   <input
@@ -394,140 +355,116 @@ export default function LoginPage() {
                     type="text"
                     value={formData.nik}
                     onChange={(event) => updateField("nik", event.target.value)}
-                    className={getInputClassName(Boolean(fieldErrors.nik))}
-                    placeholder="16 digit NIK"
+                    className="input tabular-nums"
+                    aria-invalid={Boolean(fieldErrors.nik)}
+                    placeholder="16 digit angka"
                     maxLength={NIK_LENGTH}
                     inputMode="numeric"
                     pattern="[0-9]*"
                   />
                   {fieldErrors.nik ? (
-                    <p className="mt-2 text-xs font-medium text-red-600">
-                      {fieldErrors.nik}
+                    renderError("nik")
+                  ) : (
+                    <p className="field-hint">
+                      {formData.nik.length}/{NIK_LENGTH} digit
                     </p>
-                  ) : formData.nik.length > 0 && formData.nik.length < NIK_LENGTH ? (
-                    <p className="mt-2 text-xs font-medium text-amber-600">
-                      NIK harus terdiri dari {NIK_LENGTH} digit.
-                    </p>
-                  ) : null}
+                  )}
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="alamat"
-                    className="mb-2 block text-sm font-semibold text-slate-700"
-                  >
+                  <label htmlFor="alamat" className="label">
                     Alamat
                   </label>
                   <textarea
                     id="alamat"
                     name="alamat"
                     rows={3}
+                    autoComplete="street-address"
                     value={formData.alamat}
                     onChange={(event) => updateField("alamat", event.target.value)}
-                    className={getInputClassName(Boolean(fieldErrors.alamat))}
-                    placeholder="Masukkan alamat lengkap"
+                    className="input"
+                    aria-invalid={Boolean(fieldErrors.alamat)}
+                    placeholder="Nama jalan, nomor rumah, RT/RW"
                   />
-                  {fieldErrors.alamat ? (
-                    <p className="mt-2 text-xs font-medium text-red-600">
-                      {fieldErrors.alamat}
-                    </p>
-                  ) : null}
+                  {renderError("alamat")}
                 </div>
               </>
             ) : null}
 
             <div>
-              <label
-                htmlFor="email"
-                className="mb-2 block text-sm font-semibold text-slate-700"
-              >
+              <label htmlFor="email" className="label">
                 Email
               </label>
               <input
-                id={mode === "login" ? "email" : "loginEmailMirror"}
+                id="email"
                 name="email"
                 type="email"
+                autoComplete="email"
+                inputMode="email"
                 value={formData.email}
                 onChange={(event) => updateField("email", event.target.value)}
-                className={getInputClassName(Boolean(fieldErrors.email))}
+                className="input"
+                aria-invalid={Boolean(fieldErrors.email)}
                 placeholder="nama@email.com"
               />
-              {mode === "login" && fieldErrors.email ? (
-                <p className="mt-2 text-xs font-medium text-red-600">
-                  {fieldErrors.email}
-                </p>
+              {renderError("email")}
+            </div>
+
+            <div>
+              <label htmlFor="password" className="label">
+                Kata sandi
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete={mode === "login" ? "current-password" : "new-password"}
+                value={formData.password}
+                onChange={(event) =>
+                  updateField("password", event.target.value)
+                }
+                className="input"
+                aria-invalid={Boolean(fieldErrors.password)}
+              />
+              {fieldErrors.password ? (
+                renderError("password")
+              ) : mode === "register" ? (
+                <p className="field-hint">Minimal 8 karakter, berisi huruf dan angka.</p>
               ) : null}
             </div>
 
-            <div className={mode === "register" ? "grid gap-5 sm:grid-cols-2" : ""}>
+            {mode === "register" ? (
               <div>
-                <label
-                  htmlFor="password"
-                  className="mb-2 block text-sm font-semibold text-slate-700"
-                >
-                  Password
+                <label htmlFor="confirmPassword" className="label">
+                  Ulangi kata sandi
                 </label>
                 <input
-                  id="password"
-                  name="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
                   type="password"
-                  value={formData.password}
+                  autoComplete="new-password"
+                  value={formData.confirmPassword}
                   onChange={(event) =>
-                    updateField("password", event.target.value)
+                    updateField("confirmPassword", event.target.value)
                   }
-                  className={getInputClassName(Boolean(fieldErrors.password))}
-                  placeholder="Masukkan password"
+                  className="input"
+                  aria-invalid={Boolean(fieldErrors.confirmPassword)}
                 />
-                {fieldErrors.password ? (
-                  <p className="mt-2 text-xs font-medium text-red-600">
-                    {fieldErrors.password}
-                  </p>
-                ) : null}
+                {renderError("confirmPassword")}
               </div>
-
-              {mode === "register" ? (
-                <div>
-                  <label
-                    htmlFor="confirmPassword"
-                    className="mb-2 block text-sm font-semibold text-slate-700"
-                  >
-                    Konfirmasi Password
-                  </label>
-                  <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
-                    value={formData.confirmPassword}
-                    onChange={(event) =>
-                      updateField("confirmPassword", event.target.value)
-                    }
-                    className={getInputClassName(
-                      Boolean(fieldErrors.confirmPassword),
-                    )}
-                    placeholder="Ulangi password"
-                  />
-                  {fieldErrors.confirmPassword ? (
-                    <p className="mt-2 text-xs font-medium text-red-600">
-                      {fieldErrors.confirmPassword}
-                    </p>
-                  ) : null}
-                </div>
-              ) : null}
-            </div>
+            ) : null}
 
             {errorMessage ? (
-              <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+              <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">
                 <p>{errorMessage}</p>
                 {errorHelperText ? (
-                  <p className="mt-1 text-xs font-medium text-red-500">
-                    {errorHelperText}
-                  </p>
+                  <p className="mt-1 text-xs text-red-600">{errorHelperText}</p>
                 ) : null}
               </div>
             ) : null}
 
             {successMessage ? (
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              <div role="status" className="rounded-lg border border-emerald-200 bg-emerald-50 px-3.5 py-3 text-sm text-emerald-800">
                 {successMessage}
               </div>
             ) : null}
@@ -535,16 +472,29 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full rounded-full bg-[var(--color-accent)] px-6 py-3.5 text-sm font-bold text-white shadow-[0_16px_35px_rgba(255,138,61,0.28)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
+              className="min-h-11 w-full rounded-lg bg-[var(--color-accent)] px-4 text-sm font-semibold text-white hover:bg-[var(--color-accent-strong)] disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isSubmitting
-                ? "Memproses..."
+                ? mode === "login"
+                  ? "Masuk…"
+                  : "Mendaftarkan…"
                 : mode === "login"
                   ? "Masuk"
-                  : "Daftarkan Akun"}
+                  : "Buat akun"}
             </button>
           </form>
         </div>
+
+        <p className="mt-5 text-center text-sm text-slate-600">
+          {mode === "login" ? "Belum punya akun? " : "Sudah punya akun? "}
+          <button
+            type="button"
+            onClick={() => switchMode(mode === "login" ? "register" : "login")}
+            className="text-link"
+          >
+            {mode === "login" ? "Daftar di sini" : "Masuk di sini"}
+          </button>
+        </p>
       </div>
       <ToastContainer toasts={toasts} onDismiss={dismiss} />
     </section>
