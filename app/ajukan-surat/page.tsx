@@ -10,6 +10,8 @@ import {
 import { useRouter } from "next/navigation";
 import { ToastContainer } from "@/components/Toast";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { Icon, type IconName } from "@/components/ui/Icon";
+import { LetterIcon } from "@/components/ui/LetterIcon";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { upsertCurrentUserProfile } from "@/lib/authProfile";
@@ -54,6 +56,35 @@ const jenisSuratOptions = [
   "Surat Keterangan Usaha",
   "Surat Keterangan Tidak Mampu",
   "Surat Keterangan Umum",
+];
+
+const letterHints: Record<string, string> = {
+  "Surat Domisili": "Bukti tempat tinggal untuk administrasi kependudukan",
+  "Surat Keterangan Tidak Mampu": "Untuk bantuan atau administrasi sosial",
+  "Surat Keterangan Umum": "Untuk keperluan administrasi lainnya",
+  "Surat Keterangan Usaha": "Untuk administrasi dan perizinan usaha",
+  "Surat Pengantar": "Pengantar resmi RT untuk urusan ke instansi lain",
+};
+
+const afterSubmitSteps: { icon: IconName; text: string; tile: string; title: string }[] = [
+  {
+    icon: "clock",
+    text: "Pengajuan masuk ke daftar pengurus RT.",
+    tile: "bg-amber-50 text-amber-600",
+    title: "Menunggu",
+  },
+  {
+    icon: "search",
+    text: "Pengurus memeriksa data Anda.",
+    tile: "bg-blue-50 text-blue-600",
+    title: "Diproses",
+  },
+  {
+    icon: "download",
+    text: "Surat PDF bisa diunduh dari halaman Status Pengajuan.",
+    tile: "bg-emerald-50 text-emerald-600",
+    title: "Selesai",
+  },
 ];
 
 function validateField(name: keyof FormErrors, value: string) {
@@ -339,157 +370,226 @@ function AjukanSuratForm({ profile }: { profile: ProfileRow | null }) {
     }
   }
 
+  function renderStepTitle(step: number, title: string, hint?: string) {
+    return (
+      <div className="mb-4 flex items-start gap-3">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)] text-sm font-bold text-white">
+          {step}
+        </span>
+        <div>
+          <h2 className="font-bold text-slate-900">{title}</h2>
+          {hint ? <p className="text-sm text-slate-500">{hint}</p> : null}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-10">
-      <section>
-        <PageHeader
-          icon="file"
-          title={reapplySourceId ? "Ajukan ulang surat" : "Ajukan surat"}
-          lead="Data diri sudah diisi dari akun Anda. Periksa kembali, pilih jenis surat, lalu kirim."
-        />
+    <div className="space-y-6">
+      <PageHeader
+        icon="file"
+        title={reapplySourceId ? "Ajukan ulang surat" : "Ajukan surat"}
+        lead="Pilih jenis surat, periksa data diri yang sudah terisi dari akun Anda, lalu kirim. Pengurus RT akan langsung menerimanya."
+      />
 
-        {reapplySourceId ? (
-          <div role="status" className="mt-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
-            Data dari pengajuan yang ditolak sudah dimuat. Perbaiki bagian yang
-            disebut dalam catatan pengurus sebelum mengirim ulang.
-          </div>
-        ) : null}
+      {reapplySourceId ? (
+        <div role="status" className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+          <Icon name="alert" className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+          Data dari pengajuan yang ditolak sudah dimuat. Perbaiki bagian yang
+          disebut dalam catatan pengurus sebelum mengirim ulang.
+        </div>
+      ) : null}
 
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
         <form
-          className="mt-6 space-y-5 rounded-xl border border-[var(--color-line)] bg-white p-5 sm:p-7"
+          className="space-y-5"
           onSubmit={handleSubmit}
           noValidate
         >
-          <div>
-            <label htmlFor="jenis_surat" className="label">
-              Jenis surat
-            </label>
-            <select
-              id="jenis_surat"
-              name="jenis_surat"
-              value={formData.jenis_surat}
-              onChange={handleChange}
-              className="input"
-              aria-invalid={Boolean(fieldErrors.jenis_surat)}
-            >
-              <option value="">Pilih jenis surat</option>
-              {jenisSuratOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
+          <fieldset className="rounded-xl border border-[var(--color-line)] bg-white p-5 sm:p-6">
+            <legend className="sr-only">Jenis surat</legend>
+            {renderStepTitle(1, "Pilih jenis surat")}
+            <div className="grid gap-3 sm:grid-cols-2">
+              {jenisSuratOptions.map((option) => {
+                const isSelected = formData.jenis_surat === option;
+
+                return (
+                  <label
+                    key={option}
+                    className={`relative flex cursor-pointer gap-3 rounded-xl border p-3.5 transition-colors has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-[var(--color-primary)]/30 ${
+                      isSelected
+                        ? "border-[var(--color-primary)] bg-[var(--color-primary-soft)]/60"
+                        : "border-[var(--color-line)] hover:border-[var(--color-sky)] hover:bg-slate-50"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="jenis_surat"
+                      value={option}
+                      checked={isSelected}
+                      onChange={handleChange}
+                      className="sr-only"
+                    />
+                    <LetterIcon jenisSurat={option} size="sm" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-semibold text-slate-900">{option}</span>
+                      <span className="mt-0.5 block text-xs leading-5 text-slate-500">
+                        {letterHints[option] ?? "Keperluan administrasi warga"}
+                      </span>
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
+                        isSelected
+                          ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-white"
+                          : "border-slate-300 bg-white"
+                      }`}
+                    >
+                      {isSelected ? <Icon name="check" className="h-3 w-3" strokeWidth={3.5} /> : null}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
             {fieldErrors.jenis_surat ? (
               <p className="field-error">{fieldErrors.jenis_surat}</p>
             ) : null}
-          </div>
+          </fieldset>
 
-          <div className="grid gap-5 sm:grid-cols-2">
-            <div>
-              <label htmlFor="nama" className="label">
-                Nama lengkap
-              </label>
-              <input
-                id="nama"
-                name="nama"
-                type="text"
-                autoComplete="name"
-                value={formData.nama}
-                onChange={handleChange}
-                className="input"
-                placeholder="Sesuai KTP"
-                aria-invalid={Boolean(fieldErrors.nama)}
-              />
-              {fieldErrors.nama ? (
-                <p className="field-error">{fieldErrors.nama}</p>
-              ) : null}
+          <fieldset className="rounded-xl border border-[var(--color-line)] bg-white p-5 sm:p-6">
+            <legend className="sr-only">Data diri</legend>
+            {renderStepTitle(2, "Periksa data diri", "Harus sama dengan KTP agar surat tidak ditolak.")}
+            <div className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="nama" className="label">
+                    Nama lengkap
+                  </label>
+                  <input
+                    id="nama"
+                    name="nama"
+                    type="text"
+                    autoComplete="name"
+                    value={formData.nama}
+                    onChange={handleChange}
+                    className="input"
+                    placeholder="Sesuai KTP"
+                    aria-invalid={Boolean(fieldErrors.nama)}
+                  />
+                  {fieldErrors.nama ? (
+                    <p className="field-error">{fieldErrors.nama}</p>
+                  ) : null}
+                </div>
+
+                <div>
+                  <label htmlFor="nik" className="label">
+                    NIK
+                  </label>
+                  <input
+                    id="nik"
+                    name="nik"
+                    type="text"
+                    value={formData.nik}
+                    onChange={handleChange}
+                    className="input tabular-nums"
+                    placeholder="16 digit angka"
+                    aria-invalid={Boolean(fieldErrors.nik)}
+                    maxLength={NIK_LENGTH}
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                  />
+                  {fieldErrors.nik ? (
+                    <p className="field-error">{fieldErrors.nik}</p>
+                  ) : (
+                    <p className="field-hint">
+                      {formData.nik.length}/{NIK_LENGTH} digit
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="alamat" className="label">
+                  Alamat
+                </label>
+                <textarea
+                  id="alamat"
+                  name="alamat"
+                  rows={3}
+                  autoComplete="street-address"
+                  value={formData.alamat}
+                  onChange={handleChange}
+                  className="input"
+                  placeholder="Nama jalan, nomor rumah, RT/RW"
+                  aria-invalid={Boolean(fieldErrors.alamat)}
+                />
+                {fieldErrors.alamat ? (
+                  <p className="field-error">{fieldErrors.alamat}</p>
+                ) : null}
+              </div>
             </div>
+          </fieldset>
 
-            <div>
-              <label htmlFor="nik" className="label">
-                NIK
-              </label>
-              <input
-                id="nik"
-                name="nik"
-                type="text"
-                value={formData.nik}
-                onChange={handleChange}
-                className="input tabular-nums"
-                placeholder="16 digit angka"
-                aria-invalid={Boolean(fieldErrors.nik)}
-                maxLength={NIK_LENGTH}
-                inputMode="numeric"
-                pattern="[0-9]*"
-              />
-              {fieldErrors.nik ? (
-                <p className="field-error">{fieldErrors.nik}</p>
-              ) : (
-                <p className="field-hint">
-                  {formData.nik.length}/{NIK_LENGTH} digit
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="alamat" className="label">
-              Alamat
-            </label>
-            <textarea
-              id="alamat"
-              name="alamat"
-              rows={3}
-              autoComplete="street-address"
-              value={formData.alamat}
-              onChange={handleChange}
-              className="input"
-              placeholder="Nama jalan, nomor rumah, RT/RW"
-              aria-invalid={Boolean(fieldErrors.alamat)}
-            />
-            {fieldErrors.alamat ? (
-              <p className="field-error">{fieldErrors.alamat}</p>
-            ) : null}
-          </div>
-
-          <div>
-            <label htmlFor="dokumen" className="label">
-              Dokumen pendukung <span className="font-normal text-slate-500">(opsional)</span>
-            </label>
+          <fieldset className="rounded-xl border border-[var(--color-line)] bg-white p-5 sm:p-6">
+            <legend className="sr-only">Dokumen pendukung</legend>
+            {renderStepTitle(3, "Dokumen pendukung", "Opsional.")}
             <input
               ref={fileInputRef}
               id="dokumen"
               name="dokumen"
               type="file"
               onChange={handleFileChange}
-              className="block w-full rounded-lg border border-dashed border-[var(--color-line)] bg-white p-2 text-sm text-slate-600 file:mr-3 file:min-h-9 file:rounded-md file:border-0 file:bg-[var(--color-primary-soft)] file:px-3 file:text-sm file:font-semibold file:text-[var(--color-primary)] hover:file:bg-[var(--brand-200)]"
+              className="peer sr-only"
             />
+            <label
+              htmlFor="dokumen"
+              className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[var(--color-line)] px-4 py-6 text-center hover:border-[var(--color-sky)] hover:bg-slate-50 peer-focus-visible:ring-3 peer-focus-visible:ring-[var(--color-primary)]/30"
+            >
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-primary-soft)] text-[var(--color-primary)]">
+                <Icon name="upload" />
+              </span>
+              {formData.dokumen ? (
+                <>
+                  <span className="max-w-full truncate text-sm font-semibold text-slate-900">
+                    {formData.dokumen}
+                  </span>
+                  <span className="text-xs text-slate-500">Ketuk untuk mengganti file</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-sm font-semibold text-slate-900">Pilih file</span>
+                  <span className="text-xs text-slate-500">Misalnya foto KTP atau KK</span>
+                </>
+              )}
+            </label>
             <p className="field-hint">
               Hanya nama file yang dicatat. Siapkan dokumen aslinya jika
               pengurus memintanya.
             </p>
-          </div>
+          </fieldset>
 
           {errorMessage ? (
-            <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">
+            <div role="alert" className="flex gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <Icon name="alert" className="mt-0.5 h-5 w-5 shrink-0" />
               {errorMessage}
             </div>
           ) : null}
 
-          <div className="flex flex-col-reverse gap-3 border-t border-[var(--color-line)] pt-5 sm:flex-row sm:justify-end">
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={resetForm}
               disabled={isSubmitting}
-              className="min-h-11 rounded-lg border border-[var(--color-line)] bg-white px-5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="min-h-12 rounded-lg border border-[var(--color-line)] bg-white px-5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Atur ulang
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="min-h-11 rounded-lg bg-[var(--color-accent)] px-5 text-sm font-semibold text-white hover:bg-[var(--color-accent-strong)] disabled:cursor-not-allowed disabled:opacity-70"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[var(--color-accent)] px-6 text-sm font-semibold text-white hover:bg-[var(--color-accent-strong)] disabled:cursor-not-allowed disabled:opacity-70"
             >
+              <Icon name="send" className="h-4 w-4" />
               {isSubmitting
                 ? "Mengirim…"
                 : reapplySourceId
@@ -498,29 +598,38 @@ function AjukanSuratForm({ profile }: { profile: ProfileRow | null }) {
             </button>
           </div>
         </form>
-      </section>
 
-      <aside className="space-y-4 self-start rounded-xl border border-[var(--color-line)] bg-white p-5 text-sm leading-6 text-slate-600">
-        <h2 className="text-sm font-bold text-slate-900">Setelah dikirim</h2>
-        <ol className="space-y-3">
-          <li>
-            <span className="font-semibold text-slate-800">Menunggu.</span>{" "}
-            Pengajuan masuk ke daftar pengurus RT.
-          </li>
-          <li>
-            <span className="font-semibold text-slate-800">Diproses.</span>{" "}
-            Pengurus sedang memeriksa data Anda.
-          </li>
-          <li>
-            <span className="font-semibold text-slate-800">Selesai.</span>{" "}
-            Surat PDF bisa diunduh dari halaman Status Pengajuan.
-          </li>
-        </ol>
-        <p>
-          Jika ada data yang kurang, pengajuan akan dikembalikan dengan catatan
-          dan Anda bisa mengajukan ulang.
-        </p>
-      </aside>
+        <aside className="space-y-4 lg:sticky lg:top-24">
+          <div className="rounded-xl border border-[var(--color-line)] bg-white p-5">
+            <h2 className="font-bold text-slate-900">Setelah dikirim</h2>
+            <ol className="mt-4">
+              {afterSubmitSteps.map((item, index) => (
+                <li key={item.title} className="relative flex gap-3 pb-5 last:pb-0">
+                  {index < afterSubmitSteps.length - 1 ? (
+                    <span aria-hidden="true" className="absolute bottom-0 left-4 top-9 w-px bg-[var(--color-line)]" />
+                  ) : null}
+                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${item.tile}`}>
+                    <Icon name={item.icon} className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">{item.title}</p>
+                    <p className="mt-0.5 text-sm leading-6 text-slate-500">{item.text}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <div className="flex gap-3 rounded-xl bg-[var(--color-primary)] p-5 text-sm leading-6 text-white/90">
+            <Icon name="bell" className="mt-0.5 h-5 w-5 shrink-0 text-white" />
+            <p>
+              Anda akan mendapat notifikasi setiap kali status berubah. Jika
+              ada data yang kurang, pengajuan dikembalikan dengan catatan dan
+              bisa diajukan ulang.
+            </p>
+          </div>
+        </aside>
+      </div>
 
       <ToastContainer toasts={toasts} onDismiss={dismiss} />
     </div>

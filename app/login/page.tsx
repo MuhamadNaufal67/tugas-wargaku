@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 import { ToastContainer } from "@/components/Toast";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { upsertCurrentUserProfile } from "@/lib/authProfile";
@@ -45,6 +46,12 @@ const registerSchema = z
   });
 
 type FormMode = "login" | "register";
+
+const loginBenefits: { icon: IconName; text: string; title: string }[] = [
+  { icon: "file", text: "Pilih jenis surat dan kirim dari HP kapan saja.", title: "Ajukan surat online" },
+  { icon: "bell", text: "Dapat notifikasi setiap kali status berubah.", title: "Pantau prosesnya" },
+  { icon: "download", text: "Surat jadi tersedia sebagai PDF siap cetak.", title: "Unduh suratnya" },
+];
 type FormState = {
   alamat: string;
   confirmPassword: string;
@@ -285,20 +292,50 @@ export default function LoginPage() {
   }
 
   return (
-    <section className="flex flex-1 items-start justify-center sm:items-center">
-      <div className="w-full max-w-md">
-        <div className="mb-6 text-center">
+    <section className="flex flex-1 items-start justify-center lg:items-center">
+      <div className="grid w-full max-w-5xl overflow-hidden rounded-2xl border border-[var(--color-line)] bg-white lg:grid-cols-[0.9fr_1.1fr]">
+        <aside className="relative hidden flex-col justify-between overflow-hidden bg-[var(--color-primary)] p-10 text-white lg:flex">
+          <div aria-hidden="true" className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10" />
+          <div className="relative">
+            <p className="text-2xl font-extrabold tracking-tight">
+              Warga<span className="text-orange-300">Ku</span>
+            </p>
+            <h2 className="mt-8 text-3xl font-extrabold leading-tight tracking-tight">
+              Urus surat RT tanpa antre.
+            </h2>
+            <ul className="mt-8 space-y-5">
+              {loginBenefits.map((benefit) => (
+                <li key={benefit.title} className="flex gap-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/15">
+                    <Icon name={benefit.icon} className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <p className="font-semibold">{benefit.title}</p>
+                    <p className="mt-0.5 text-sm leading-6 text-white/80">{benefit.text}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <p className="relative mt-10 rounded-xl border border-white/25 bg-white/10 p-4 text-sm leading-6 text-white/90 backdrop-blur-md">
+            Satu akun untuk mengajukan, memantau, dan mengunduh surat dari
+            pengurus RT.
+          </p>
+        </aside>
+
+        <div className="p-5 sm:p-8 lg:p-10">
+        <div className="mb-6">
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
             {mode === "login" ? "Masuk ke WargaKu" : "Daftar akun warga"}
           </h1>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
+          <p className="mt-1.5 text-sm leading-6 text-slate-600">
             {mode === "login"
               ? "Masuk untuk mengajukan surat dan melihat status pengajuan Anda."
               : "Data diri Anda akan dipakai untuk mengisi formulir surat secara otomatis."}
           </p>
         </div>
 
-        <div className="rounded-xl border border-[var(--color-line)] bg-white p-5 sm:p-7">
+        <div>
           <div
             role="tablist"
             aria-label="Pilih masuk atau daftar"
@@ -485,7 +522,7 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <p className="mt-5 text-center text-sm text-slate-600">
+        <p className="mt-6 text-center text-sm text-slate-600">
           {mode === "login" ? "Belum punya akun? " : "Sudah punya akun? "}
           <button
             type="button"
@@ -495,6 +532,7 @@ export default function LoginPage() {
             {mode === "login" ? "Daftar di sini" : "Masuk di sini"}
           </button>
         </p>
+        </div>
       </div>
       <ToastContainer toasts={toasts} onDismiss={dismiss} />
     </section>

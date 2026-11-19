@@ -10,7 +10,7 @@ WargaKu RT is a web app for neighborhood (RT) administration. Residents can requ
 
 **Residents (`user` role)**
 - Register and log in with email and password (Supabase Auth). Registration collects full name, a 16-digit NIK and address.
-- Submit a letter request through a validated form. Five letter types are available: domicile (*domisili*), business (*usaha*), low-income (*tidak mampu*), RT cover letter (*pengantar RT*) and general (*umum*).
+- Submit a letter request through a validated, three-step form with the letter type picked from cards. Five letter types are available: domicile (*domisili*), business (*usaha*), low-income (*tidak mampu*), RT cover letter (*pengantar RT*) and general (*umum*).
 - Track requests by status (*Menunggu*, *Diproses*, *Selesai*, *Ditolak*), with search, status filters with counts, and a step-by-step progress tracker on each request.
 - Resident dashboard with a greeting, the progress of the latest request, request and notification counts, recent requests and the latest announcements.
 - See the rejection reason and resubmit a rejected request with the form pre-filled.
@@ -22,7 +22,7 @@ WargaKu RT is a web app for neighborhood (RT) administration. Residents can requ
 - Admin dashboard showing request counts per status, the latest requests and an activity timeline.
 - Change a request's status, give a reason when rejecting, or delete a request.
 - Preview the letter and generate an A4 PDF, numbered automatically, when a request is completed.
-- Create announcements. Each one also creates a notification for every resident.
+- Create announcements in one of four categories, with a live preview. Each one also creates a notification for every resident.
 
 **Live updates**
 - Request lists, announcements and notifications refresh in real time through Supabase Realtime (`postgres_changes` subscriptions).
@@ -56,6 +56,16 @@ Screenshots of the running app. The logged-in pages show **fictional sample data
 
 ![Request status page](docs/screenshots/status-resident.png)
 
+**Submit a letter:** the letter type is picked from cards, the form is split into three steps, and personal data is pre-filled from the account.
+
+![Letter request form](docs/screenshots/submit-letter.png)
+
+**Announcements:** residents read announcements with color-coded categories; administrators write them with a live preview of what residents will see.
+
+![Announcements page for residents](docs/screenshots/announcements-resident.png)
+
+![Announcement editor for administrators](docs/screenshots/announcements-admin.png)
+
 **Admin dashboard:** requests per status, recent requests and an activity timeline.
 
 ![Admin dashboard](docs/screenshots/dashboard-admin.png)
@@ -65,9 +75,9 @@ Screenshots of the running app. The logged-in pages show **fictional sample data
 | ![Resident dashboard on a phone](docs/screenshots/dashboard-mobile.png) | ![Home page on a phone](docs/screenshots/home-mobile.png) | ![Help page on a phone](docs/screenshots/help-mobile.png) |
 
 <details>
-<summary>Registration form (desktop)</summary>
+<summary>Sign-in page (desktop)</summary>
 
-![Registration form](docs/screenshots/register-desktop.png)
+![Sign-in page](docs/screenshots/login-desktop.png)
 
 </details>
 
@@ -90,8 +100,8 @@ app/          Routes (App Router): /, /login, /dashboard, /ajukan-surat, /status
               tokens and shared form styles
 components/   Navbar, auth provider, dashboards, letter preview, toasts;
               components/ui has the shared Button, Card, Icon, PageHeader,
-              StatusBadge, StatusTracker, LetterIcon, EmptyState and
-              PageSkeleton
+              StatusBadge, StatusTracker, LetterIcon, CategoryChip,
+              EmptyState and PageSkeleton
 docs/         README screenshots
 hooks/        useAuth, useToast
 lib/          Supabase client and types, auth/profile helpers, announcements,
