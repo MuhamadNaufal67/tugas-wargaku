@@ -43,25 +43,38 @@ export default function RootLayout({
               {children}
             </main>
 
-            <footer className="border-t border-[var(--color-line)] bg-white">
-              <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-6 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-                <p>
-                  <span className="font-bold text-[var(--color-primary)]">
+            <footer className="mt-10 border-t border-[var(--color-line)] bg-white">
+              <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-10 sm:grid-cols-[1.5fr_1fr_1fr] sm:px-6 lg:px-8">
+                <div>
+                  <p className="text-xl font-extrabold tracking-tight text-[var(--color-primary)]">
                     Warga<span className="text-[var(--color-accent)]">Ku</span>
-                  </span>{" "}
-                  &middot; Layanan surat dan informasi untuk warga RT
-                </p>
-                <nav aria-label="Tautan footer" className="flex gap-5">
-                  <Link href="/about" className="hover:text-slate-800">
-                    Tentang
-                  </Link>
-                  <Link href="/services" className="hover:text-slate-800">
-                    Layanan
-                  </Link>
-                  <Link href="/contact" className="hover:text-slate-800">
-                    Bantuan
-                  </Link>
+                  </p>
+                  <p className="mt-2 max-w-xs text-sm leading-6 text-slate-500">
+                    Layanan surat dan informasi untuk warga RT, bisa diakses
+                    dari ponsel maupun komputer.
+                  </p>
+                </div>
+                <nav aria-label="Layanan" className="text-sm">
+                  <p className="font-semibold text-slate-900">Layanan</p>
+                  <ul className="mt-3 space-y-2 text-slate-500">
+                    <li><Link href="/ajukan-surat" className="hover:text-slate-900">Ajukan surat</Link></li>
+                    <li><Link href="/status" className="hover:text-slate-900">Status pengajuan</Link></li>
+                    <li><Link href="/pengumuman" className="hover:text-slate-900">Pengumuman RT</Link></li>
+                  </ul>
                 </nav>
+                <nav aria-label="Informasi" className="text-sm">
+                  <p className="font-semibold text-slate-900">Informasi</p>
+                  <ul className="mt-3 space-y-2 text-slate-500">
+                    <li><Link href="/about" className="hover:text-slate-900">Tentang</Link></li>
+                    <li><Link href="/services" className="hover:text-slate-900">Layanan</Link></li>
+                    <li><Link href="/contact" className="hover:text-slate-900">Bantuan</Link></li>
+                  </ul>
+                </nav>
+              </div>
+              <div className="border-t border-[var(--color-line)]">
+                <p className="mx-auto w-full max-w-6xl px-4 py-4 text-xs text-slate-400 sm:px-6 lg:px-8">
+                  &copy; 2026 WargaKu &middot; Proyek tim Studi Independen VINIX7
+                </p>
               </div>
             </footer>
           </div>

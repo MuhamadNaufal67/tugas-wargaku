@@ -1,6 +1,8 @@
 import { headers } from "next/headers";
 import Link from "next/link";
 import { LinkButton } from "@/components/ui/Button";
+import { Icon, type IconName } from "@/components/ui/Icon";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 type ServiceItem = {
   id: number;
@@ -9,10 +11,10 @@ type ServiceItem = {
   detail: string;
 };
 
-const serviceLinks: Record<number, { href: string; label: string }> = {
-  1: { href: "/ajukan-surat", label: "Buka formulir" },
-  2: { href: "/status", label: "Cek status" },
-  3: { href: "/pengumuman", label: "Baca pengumuman" },
+const serviceExtras: Record<number, { href: string; icon: IconName; label: string }> = {
+  1: { href: "/ajukan-surat", icon: "file", label: "Buka formulir" },
+  2: { href: "/status", icon: "search", label: "Cek status" },
+  3: { href: "/pengumuman", icon: "megaphone", label: "Baca pengumuman" },
 };
 
 async function getServices() {
@@ -41,30 +43,39 @@ export default async function ServicesPage() {
   const services = await getServices();
 
   return (
-    <div className="space-y-10">
-      <header className="max-w-2xl">
-        <h1 className="page-title">Layanan</h1>
-        <p className="page-lead">
-          Tiga layanan yang bisa dipakai warga setelah masuk ke akun. Semuanya
-          bisa dibuka dari ponsel.
-        </p>
-      </header>
+    <div className="space-y-10 sm:space-y-12">
+      <PageHeader
+        icon="file"
+        title="Layanan"
+        lead="Tiga layanan yang bisa dipakai warga setelah masuk ke akun. Semuanya bisa dibuka dari ponsel."
+      />
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-5 md:grid-cols-3">
         {services.map((service) => {
-          const link = serviceLinks[service.id];
+          const extra = serviceExtras[service.id];
 
           return (
             <article
               key={service.id}
-              className="flex flex-col rounded-xl border border-[var(--color-line)] bg-white p-5 sm:p-6"
+              className="group flex flex-col rounded-xl border border-[var(--color-line)] bg-white p-6 hover:border-[var(--color-sky)]"
             >
-              <h2 className="section-title">{service.title}</h2>
+              {extra ? (
+                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--color-primary)] text-white">
+                  <Icon name={extra.icon} className="h-6 w-6" />
+                </span>
+              ) : null}
+              <h2 className="mt-5 text-lg font-bold text-slate-900">{service.title}</h2>
               <p className="mt-2 text-sm leading-6 text-slate-700">{service.description}</p>
-              <p className="mt-3 flex-1 text-sm leading-6 text-slate-500">{service.detail}</p>
-              {link ? (
-                <Link href={link.href} className="text-link mt-5 inline-flex min-h-11 items-center text-sm">
-                  {link.label}
+              <p className="mt-3 flex-1 border-t border-dashed border-[var(--color-line)] pt-3 text-sm leading-6 text-slate-500">
+                {service.detail}
+              </p>
+              {extra ? (
+                <Link
+                  href={extra.href}
+                  className="mt-5 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg bg-[var(--color-primary-soft)] px-4 text-sm font-semibold text-[var(--color-primary)] hover:bg-[var(--brand-200)]"
+                >
+                  {extra.label}
+                  <Icon name="chevronRight" className="h-4 w-4" />
                 </Link>
               ) : null}
             </article>
@@ -72,16 +83,22 @@ export default async function ServicesPage() {
         })}
       </section>
 
-      <section className="flex flex-col gap-4 rounded-xl border border-[var(--color-line)] bg-white p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-        <div>
-          <p className="font-semibold text-slate-900">Belum punya akun?</p>
-          <p className="mt-1 text-sm text-slate-500">
-            Pendaftaran hanya butuh email, NIK, dan alamat.
-          </p>
+      <section className="relative overflow-hidden rounded-2xl bg-[var(--color-primary)] p-6 text-white sm:p-8">
+        <div aria-hidden="true" className="absolute -right-12 -top-16 h-48 w-48 rounded-full bg-white/10" />
+        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex gap-4">
+            <span className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/15 sm:flex">
+              <Icon name="userPlus" className="h-6 w-6" />
+            </span>
+            <div>
+              <p className="text-lg font-bold">Belum punya akun?</p>
+              <p className="mt-1 text-white/85">Pendaftaran hanya butuh email, NIK, dan alamat.</p>
+            </div>
+          </div>
+          <LinkButton href="/login?mode=register" variant="accent" className="sm:px-6">
+            Daftar sebagai warga
+          </LinkButton>
         </div>
-        <LinkButton href="/login?mode=register" variant="primary">
-          Daftar sebagai warga
-        </LinkButton>
       </section>
     </div>
   );

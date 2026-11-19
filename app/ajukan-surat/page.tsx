@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { ToastContainer } from "@/components/Toast";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { upsertCurrentUserProfile } from "@/lib/authProfile";
@@ -341,15 +342,11 @@ function AjukanSuratForm({ profile }: { profile: ProfileRow | null }) {
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-10">
       <section>
-        <header>
-          <h1 className="page-title">
-            {reapplySourceId ? "Ajukan ulang surat" : "Ajukan surat"}
-          </h1>
-          <p className="page-lead">
-            Data diri sudah diisi dari akun Anda. Periksa kembali, pilih jenis
-            surat, lalu kirim.
-          </p>
-        </header>
+        <PageHeader
+          icon="file"
+          title={reapplySourceId ? "Ajukan ulang surat" : "Ajukan surat"}
+          lead="Data diri sudah diisi dari akun Anda. Periksa kembali, pilih jenis surat, lalu kirim."
+        />
 
         {reapplySourceId ? (
           <div role="status" className="mt-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
@@ -503,7 +500,7 @@ function AjukanSuratForm({ profile }: { profile: ProfileRow | null }) {
         </form>
       </section>
 
-      <aside className="space-y-4 text-sm leading-6 text-slate-600 lg:pt-24">
+      <aside className="space-y-4 self-start rounded-xl border border-[var(--color-line)] bg-white p-5 text-sm leading-6 text-slate-600">
         <h2 className="text-sm font-bold text-slate-900">Setelah dikirim</h2>
         <ol className="space-y-3">
           <li>

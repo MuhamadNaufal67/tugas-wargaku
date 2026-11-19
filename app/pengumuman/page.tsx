@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ToastContainer } from "@/components/Toast";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import {
@@ -164,13 +165,11 @@ export default function PengumumanPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="page-title">Pengumuman RT</h1>
-        <p className="page-lead">
-          Informasi dari pengurus, seperti jadwal kegiatan dan pemberitahuan
-          penting. Pengumuman baru juga dikirim ke notifikasi Anda.
-        </p>
-      </header>
+      <PageHeader
+        icon="megaphone"
+        title="Pengumuman RT"
+        lead="Informasi dari pengurus, seperti jadwal kegiatan dan pemberitahuan penting. Pengumuman baru juga dikirim ke notifikasi Anda."
+      />
 
       <div className="grid items-start gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <article

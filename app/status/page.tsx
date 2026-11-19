@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ToastContainer } from "@/components/Toast";
 import { LetterTemplatePreview } from "@/components/pdf/LetterTemplatePreview";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { createNotification } from "@/lib/notifications";
@@ -507,27 +508,26 @@ export default function StatusPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="page-title">
-            {isAdmin ? "Kelola pengajuan" : "Status pengajuan"}
-          </h1>
-          <p className="page-lead">
-            {isAdmin
-              ? "Periksa pengajuan warga, ubah statusnya, dan buat surat PDF saat pengajuan selesai."
-              : "Semua surat yang pernah Anda ajukan. Status diperbarui otomatis saat pengurus memprosesnya."}
-          </p>
-        </div>
-        {!isAdmin ? (
-          <button
-            type="button"
-            onClick={() => router.push("/ajukan-surat")}
-            className="min-h-11 shrink-0 rounded-lg bg-[var(--color-accent)] px-4 text-sm font-semibold text-white hover:bg-[var(--color-accent-strong)]"
-          >
-            Ajukan surat baru
-          </button>
-        ) : null}
-      </header>
+      <PageHeader
+        icon={isAdmin ? "clipboard" : "search"}
+        title={isAdmin ? "Kelola pengajuan" : "Status pengajuan"}
+        lead={
+          isAdmin
+            ? "Periksa pengajuan warga, ubah statusnya, dan buat surat PDF saat pengajuan selesai."
+            : "Semua surat yang pernah Anda ajukan. Status diperbarui otomatis saat pengurus memprosesnya."
+        }
+        actions={
+          !isAdmin ? (
+            <button
+              type="button"
+              onClick={() => router.push("/ajukan-surat")}
+              className="min-h-11 shrink-0 rounded-lg bg-[var(--color-accent)] px-4 text-sm font-semibold text-white hover:bg-[var(--color-accent-strong)]"
+            >
+              Ajukan surat baru
+            </button>
+          ) : null
+        }
+      />
 
       <section aria-label="Pencarian dan filter" className="space-y-3">
         <div className="relative">

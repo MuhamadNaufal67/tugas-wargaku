@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ToastContainer } from "@/components/Toast";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import {
@@ -189,13 +190,11 @@ export default function AdminAnnouncementsPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="page-title">Pengumuman</h1>
-        <p className="page-lead">
-          Tulis informasi untuk warga. Setelah diterbitkan, pengumuman tampil
-          di halaman warga dan dikirim sebagai notifikasi ke setiap akun warga.
-        </p>
-      </header>
+      <PageHeader
+        icon="megaphone"
+        title="Pengumuman"
+        lead="Tulis informasi untuk warga. Setelah diterbitkan, pengumuman tampil di halaman warga dan dikirim sebagai notifikasi ke setiap akun warga."
+      />
 
       <div className="grid items-start gap-6 lg:grid-cols-[1fr_1fr]">
         <section

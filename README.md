@@ -4,12 +4,15 @@ WargaKu RT is a web app for neighborhood (RT) administration. Residents can requ
 
 **Live demo:** https://wargaku-rt.vercel.app/
 
+![WargaKu home page](docs/screenshots/home-desktop.png)
+
 ## Features
 
 **Residents (`user` role)**
 - Register and log in with email and password (Supabase Auth). Registration collects full name, a 16-digit NIK and address.
 - Submit a letter request through a validated form. Five letter types are available: domicile (*domisili*), business (*usaha*), low-income (*tidak mampu*), RT cover letter (*pengantar RT*) and general (*umum*).
-- Track requests by status (Pending, Diproses, Selesai, Ditolak), with search and status filters.
+- Track requests by status (*Menunggu*, *Diproses*, *Selesai*, *Ditolak*), with search and status filters.
+- Resident dashboard with a greeting, request and notification counts, recent requests and the latest announcements.
 - See the rejection reason and resubmit a rejected request with the form pre-filled.
 - Download the finished letter as a PDF.
 - Read announcements from the RT.
@@ -24,20 +27,33 @@ WargaKu RT is a web app for neighborhood (RT) administration. Residents can requ
 **Live updates**
 - Request lists, announcements and notifications refresh in real time through Supabase Realtime (`postgres_changes` subscriptions).
 
+**Interface**
+- Responsive layout for phones, tablets and desktops: a slide-in menu on small screens, finger-sized buttons and form fields, and dialogs that open as bottom sheets on phones.
+- Navigation changes with the user's role: visitors, residents and administrators each see their own menu.
+- A help page with frequently asked questions and a contact form that opens the user's email app.
+
 ## Tech Stack
 
 | Area | Technology |
 | --- | --- |
 | Framework | Next.js 16.2 (App Router), React 19.2, TypeScript |
-| Styling | Tailwind CSS 4 |
+| Styling | Tailwind CSS 4, Plus Jakarta Sans (`next/font`) |
 | Backend | Supabase: Auth, Postgres, Realtime (`@supabase/supabase-js` 2) |
 | Validation | Zod 4 |
 | PDF | Built-in generator in `lib/pdf` (no external PDF library) |
 | Deployment | Vercel |
 
+## Screenshots
+
+Screenshots of the running app.
+
+| Registration (desktop) | Home (phone) | Help (phone) |
+| --- | --- | --- |
+| ![Registration form](docs/screenshots/register-desktop.png) | ![Home page on a phone](docs/screenshots/home-mobile.png) | ![Help page on a phone](docs/screenshots/help-mobile.png) |
+
 ## Design
 
-The UI was designed in Figma before development. The images below are **Figma hi-fi designs, not screenshots of the running app**.
+The UI was designed in Figma before development, and the app uses the same colors and typeface. The images below are **Figma hi-fi designs, not screenshots of the running app**.
 
 | Dashboard | Submit a letter | Request status |
 | --- | --- | --- |
@@ -50,8 +66,12 @@ Figma file: [WargaKu RT design](https://www.figma.com/design/GfDeMgNBKQOoHTpYPSF
 ```
 app/          Routes (App Router): /, /login, /dashboard, /ajukan-surat, /status,
               /pengumuman, /admin, /admin/pengumuman, /about, /services, /contact,
-              plus the /api/services route handler
-components/   Shared UI, auth provider, navbar, dashboards, letter preview
+              plus the /api/services route handler; globals.css holds the color
+              tokens and shared form styles
+components/   Navbar, auth provider, dashboards, letter preview, toasts;
+              components/ui has the shared Button, Card, StatusBadge,
+              EmptyState and PageSkeleton
+docs/         README screenshots
 hooks/        useAuth, useToast
 lib/          Supabase client and types, auth/profile helpers, announcements,
               notifications, NIK validation, PDF generation (lib/pdf)
