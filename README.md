@@ -11,15 +11,15 @@ WargaKu RT is a web app for neighborhood (RT) administration. Residents can requ
 **Residents (`user` role)**
 - Register and log in with email and password (Supabase Auth). Registration collects full name, a 16-digit NIK and address.
 - Submit a letter request through a validated form. Five letter types are available: domicile (*domisili*), business (*usaha*), low-income (*tidak mampu*), RT cover letter (*pengantar RT*) and general (*umum*).
-- Track requests by status (*Menunggu*, *Diproses*, *Selesai*, *Ditolak*), with search and status filters.
-- Resident dashboard with a greeting, request and notification counts, recent requests and the latest announcements.
+- Track requests by status (*Menunggu*, *Diproses*, *Selesai*, *Ditolak*), with search, status filters with counts, and a step-by-step progress tracker on each request.
+- Resident dashboard with a greeting, the progress of the latest request, request and notification counts, recent requests and the latest announcements.
 - See the rejection reason and resubmit a rejected request with the form pre-filled.
 - Download the finished letter as a PDF.
 - Read announcements from the RT.
 - Get in-app notifications when a request's status changes or a new announcement is posted, and mark them as read.
 
 **Administrators (`admin` role)**
-- Admin dashboard showing request counts per status and the latest requests.
+- Admin dashboard showing request counts per status, the latest requests and an activity timeline.
 - Change a request's status, give a reason when rejecting, or delete a request.
 - Preview the letter and generate an A4 PDF, numbered automatically, when a request is completed.
 - Create announcements. Each one also creates a notification for every resident.
@@ -29,6 +29,7 @@ WargaKu RT is a web app for neighborhood (RT) administration. Residents can requ
 
 **Interface**
 - Responsive layout for phones, tablets and desktops: a slide-in menu on small screens, finger-sized buttons and form fields, and dialogs that open as bottom sheets on phones.
+- Floating "liquid glass" navigation bar (translucent, blurred background), with a solid fallback for browsers without `backdrop-filter` support.
 - Navigation changes with the user's role: visitors, residents and administrators each see their own menu.
 - A help page with frequently asked questions and a contact form that opens the user's email app.
 
@@ -45,11 +46,30 @@ WargaKu RT is a web app for neighborhood (RT) administration. Residents can requ
 
 ## Screenshots
 
-Screenshots of the running app.
+Screenshots of the running app. The logged-in pages show **fictional sample data**.
 
-| Registration (desktop) | Home (phone) | Help (phone) |
+**Resident dashboard:** greeting, progress of the latest request, counts, requests and announcements.
+
+![Resident dashboard](docs/screenshots/dashboard-resident.png)
+
+**Request status:** filter tabs with counts, and a progress tracker on every request. Rejected requests show the administrator's note and a resubmit button.
+
+![Request status page](docs/screenshots/status-resident.png)
+
+**Admin dashboard:** requests per status, recent requests and an activity timeline.
+
+![Admin dashboard](docs/screenshots/dashboard-admin.png)
+
+| Dashboard (phone) | Home (phone) | Help (phone) |
 | --- | --- | --- |
-| ![Registration form](docs/screenshots/register-desktop.png) | ![Home page on a phone](docs/screenshots/home-mobile.png) | ![Help page on a phone](docs/screenshots/help-mobile.png) |
+| ![Resident dashboard on a phone](docs/screenshots/dashboard-mobile.png) | ![Home page on a phone](docs/screenshots/home-mobile.png) | ![Help page on a phone](docs/screenshots/help-mobile.png) |
+
+<details>
+<summary>Registration form (desktop)</summary>
+
+![Registration form](docs/screenshots/register-desktop.png)
+
+</details>
 
 ## Design
 
@@ -69,8 +89,9 @@ app/          Routes (App Router): /, /login, /dashboard, /ajukan-surat, /status
               plus the /api/services route handler; globals.css holds the color
               tokens and shared form styles
 components/   Navbar, auth provider, dashboards, letter preview, toasts;
-              components/ui has the shared Button, Card, StatusBadge,
-              EmptyState and PageSkeleton
+              components/ui has the shared Button, Card, Icon, PageHeader,
+              StatusBadge, StatusTracker, LetterIcon, EmptyState and
+              PageSkeleton
 docs/         README screenshots
 hooks/        useAuth, useToast
 lib/          Supabase client and types, auth/profile helpers, announcements,

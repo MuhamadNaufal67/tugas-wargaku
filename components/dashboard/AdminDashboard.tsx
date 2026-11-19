@@ -9,6 +9,8 @@ import type { NotificationRow, PengajuanRow } from "@/lib/supabaseClient";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { Icon, type IconName } from "@/components/ui/Icon";
+import { getLetterIconName } from "@/components/ui/LetterIcon";
 
 type AdminDashboardState = {
   notifications: NotificationRow[];
@@ -20,17 +22,39 @@ function countByStatus(items: PengajuanRow[], status: string) {
 }
 
 function StatCard({
+  className = "",
+  icon,
   label,
+  tile,
   value,
 }: {
+  className?: string;
+  icon: IconName;
   label: string;
+  tile: string;
   value: number;
 }) {
   return (
-    <div className="bg-white px-4 py-4 sm:px-5">
-      <dt className="text-sm text-slate-500">{label}</dt>
-      <dd className="mt-1 text-2xl font-bold tabular-nums text-slate-900">{value}</dd>
+    <div className={`flex items-center gap-3 rounded-xl border border-[var(--color-line)] bg-white p-4 ${className}`}>
+      <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${tile}`}>
+        <Icon name={icon} className="h-5 w-5" />
+      </span>
+      <div className="flex min-w-0 flex-col-reverse">
+        <dt className="truncate text-sm text-slate-500">{label}</dt>
+        <dd className="text-2xl font-extrabold tabular-nums text-slate-900">{value}</dd>
+      </div>
     </div>
+  );
+}
+
+function getInitials(name: string) {
+  return (
+    name
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? "")
+      .join("") || "?"
   );
 }
 
@@ -122,75 +146,94 @@ export default function AdminDashboard() {
   if (isAuthLoading || isLoading) {
     return (
       <div aria-busy="true" aria-label="Memuat dashboard" className="animate-pulse space-y-6">
-        <div className="h-8 w-60 rounded-md bg-slate-200" />
-        <div className="h-24 rounded-xl border border-[var(--color-line)] bg-white" />
+        <div className="h-44 rounded-2xl bg-slate-200" />
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
+          {[0, 1, 2, 3, 4].map((key) => (
+            <div key={key} className="h-20 rounded-xl border border-[var(--color-line)] bg-white" />
+          ))}
+        </div>
         <div className="h-80 rounded-xl border border-[var(--color-line)] bg-white" />
       </div>
     );
   }
 
   const pendingCount = countByStatus(data.pengajuan, "pending");
+  const processingCount = countByStatus(data.pengajuan, "diproses");
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="page-title">Dashboard pengurus</h1>
-          <p className="page-lead">
-            {pendingCount > 0
-              ? `Ada ${pendingCount} pengajuan yang menunggu untuk diperiksa.`
-              : "Tidak ada pengajuan yang menunggu. Semua sudah ditangani."}
-          </p>
+      <section className="relative overflow-hidden rounded-2xl bg-[var(--color-primary)] px-5 py-7 text-white sm:px-8 sm:py-8">
+        <div aria-hidden="true" className="absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/10" />
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Dashboard pengurus</h1>
+            <p className="mt-2 max-w-xl leading-7 text-white/85">
+              {pendingCount > 0
+                ? `Ada ${pendingCount} pengajuan baru yang menunggu diperiksa${
+                    processingCount > 0 ? ` dan ${processingCount} sedang diproses` : ""
+                  }.`
+                : "Tidak ada pengajuan yang menunggu. Semua sudah ditangani."}
+            </p>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <LinkButton href="/status" variant="accent" className="sm:px-5">
+              Kelola pengajuan
+            </LinkButton>
+            <Link
+              href="/admin/pengumuman"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/40 px-5 text-sm font-semibold text-white hover:bg-white/10"
+            >
+              <Icon name="megaphone" className="h-4 w-4" />
+              Tulis pengumuman
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <LinkButton href="/status">Kelola pengajuan</LinkButton>
-          <LinkButton href="/admin/pengumuman" variant="secondary">
-            Tulis pengumuman
-          </LinkButton>
-        </div>
-      </header>
+      </section>
 
-      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-line)] sm:grid-cols-5 [&>*:first-child]:col-span-2 sm:[&>*:first-child]:col-span-1">
-        <StatCard label="Total" value={data.pengajuan.length} />
-        <StatCard label="Menunggu" value={pendingCount} />
-        <StatCard label="Diproses" value={countByStatus(data.pengajuan, "diproses")} />
-        <StatCard label="Selesai" value={countByStatus(data.pengajuan, "selesai")} />
-        <StatCard label="Ditolak" value={countByStatus(data.pengajuan, "ditolak")} />
+      <dl className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
+        <StatCard className="col-span-2 lg:col-span-1" icon="file" label="Total" tile="bg-[var(--color-primary-soft)] text-[var(--color-primary)]" value={data.pengajuan.length} />
+        <StatCard icon="clock" label="Menunggu" tile="bg-amber-50 text-amber-600" value={pendingCount} />
+        <StatCard icon="search" label="Diproses" tile="bg-blue-50 text-blue-600" value={processingCount} />
+        <StatCard icon="check" label="Selesai" tile="bg-emerald-50 text-emerald-600" value={countByStatus(data.pengajuan, "selesai")} />
+        <StatCard icon="x" label="Ditolak" tile="bg-red-50 text-red-500" value={countByStatus(data.pengajuan, "ditolak")} />
       </dl>
 
-      <div className="grid gap-6 xl:grid-cols-[1.4fr_0.6fr]">
+      <div className="grid gap-6 xl:grid-cols-[1.45fr_0.55fr]">
         <section aria-labelledby="recent-title" className="rounded-xl border border-[var(--color-line)] bg-white">
-          <div className="flex items-start justify-between gap-3 px-4 pt-4 sm:px-5 sm:pt-5">
-            <div>
-              <h2 id="recent-title" className="section-title">Pengajuan terbaru</h2>
-              <p className="section-lead">8 pengajuan terakhir yang sesuai filter.</p>
-            </div>
+          <div className="flex items-center justify-between gap-3 border-b border-[var(--color-line)] px-4 py-3 sm:px-5">
+            <h2 id="recent-title" className="flex items-center gap-2 text-base font-bold text-slate-900">
+              <Icon name="clipboard" className="h-5 w-5 text-[var(--color-primary)]" />
+              Pengajuan terbaru
+            </h2>
             <Button onClick={() => void loadDashboard()} variant="secondary" size="sm">
               Muat ulang
             </Button>
           </div>
 
           <div className="space-y-3 px-4 py-4 sm:px-5">
-            <input
-              type="search"
-              aria-label="Cari pengajuan"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Cari nama, NIK, atau jenis surat"
-              className="input"
-            />
+            <div className="relative">
+              <Icon name="search" className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-400" />
+              <input
+                type="search"
+                aria-label="Cari pengajuan"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Cari nama, NIK, atau jenis surat"
+                className="input pl-10"
+              />
+            </div>
             <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-              <div role="group" aria-label="Filter status" className="flex w-max gap-2">
+              <div role="group" aria-label="Filter status" className="flex w-max gap-1 rounded-xl bg-slate-100 p-1">
                 {statusFilterOptions.map((option) => (
                   <button
                     key={option.value}
                     type="button"
                     aria-pressed={statusFilter === option.value}
                     onClick={() => setStatusFilter(option.value)}
-                    className={`min-h-9 rounded-full px-3.5 text-sm font-semibold ${
+                    className={`min-h-9 rounded-lg px-3.5 text-sm font-semibold ${
                       statusFilter === option.value
-                        ? "bg-slate-900 text-white"
-                        : "border border-[var(--color-line)] bg-white text-slate-600 hover:text-slate-900"
+                        ? "bg-white text-slate-900 shadow-sm"
+                        : "text-slate-500 hover:text-slate-800"
                     }`}
                   >
                     {option.label}
@@ -203,6 +246,7 @@ export default function AdminDashboard() {
           {filteredPengajuan.length === 0 ? (
             <div className="px-4 pb-5 sm:px-5">
               <EmptyState
+                icon={<Icon name="search" className="h-8 w-8" strokeWidth={1.5} />}
                 title="Tidak ada pengajuan yang cocok"
                 description="Ubah kata kunci atau pilih filter Semua."
               />
@@ -213,42 +257,72 @@ export default function AdminDashboard() {
                 <li key={item.id}>
                   <Link
                     href={`/status?highlight=${item.id}`}
-                    className="flex items-center justify-between gap-3 px-4 py-3.5 hover:bg-slate-50 sm:px-5"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 sm:px-5"
                   >
-                    <div className="min-w-0">
+                    <span
+                      aria-hidden="true"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)] text-sm font-bold text-white"
+                    >
+                      {getInitials(item.nama)}
+                    </span>
+                    <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-slate-900">{item.nama}</p>
-                      <p className="truncate text-sm text-slate-500">{item.jenis_surat}</p>
+                      <p className="flex items-center gap-1.5 truncate text-xs text-slate-500">
+                        <Icon name={getLetterIconName(item.jenis_surat)} className="h-3.5 w-3.5 shrink-0" />
+                        {item.jenis_surat}
+                      </p>
                     </div>
+                    <span className="hidden text-xs text-slate-400 sm:block">
+                      {formatNotificationTime(item.created_at)}
+                    </span>
                     <StatusBadge status={item.status} />
                   </Link>
                 </li>
               ))}
             </ul>
           )}
+
+          {filteredPengajuan.length > 8 ? (
+            <div className="border-t border-[var(--color-line)] px-4 py-3 text-center sm:px-5">
+              <Link href="/status" className="text-link text-sm">
+                Lihat {filteredPengajuan.length - 8} pengajuan lainnya
+              </Link>
+            </div>
+          ) : null}
         </section>
 
         <section aria-labelledby="activity-title" className="rounded-xl border border-[var(--color-line)] bg-white">
-          <div className="px-4 pt-4 sm:px-5 sm:pt-5">
-            <h2 id="activity-title" className="section-title">Aktivitas terakhir</h2>
-            <p className="section-lead">Notifikasi yang dikirim oleh sistem.</p>
+          <div className="border-b border-[var(--color-line)] px-4 py-3 sm:px-5">
+            <h2 id="activity-title" className="flex items-center gap-2 text-base font-bold text-slate-900">
+              <Icon name="clock" className="h-5 w-5 text-[var(--color-accent)]" />
+              Aktivitas terakhir
+            </h2>
           </div>
 
           {recentActivity.length === 0 ? (
             <div className="p-4 sm:p-5">
               <EmptyState
+                icon={<Icon name="clock" className="h-8 w-8" strokeWidth={1.5} />}
                 title="Belum ada aktivitas"
                 description="Aktivitas muncul setelah warga mengirim pengajuan atau status diubah."
               />
             </div>
           ) : (
-            <ol className="mt-3 divide-y divide-[var(--color-line)] border-t border-[var(--color-line)]">
-              {recentActivity.map((item) => (
-                <li key={item.id} className="px-4 py-3 sm:px-5">
-                  <p className="text-sm font-semibold text-slate-900">{item.title}</p>
-                  <p className="mt-0.5 line-clamp-2 text-sm leading-6 text-slate-500">{item.message}</p>
-                  <p className="mt-1 text-xs text-slate-400">
-                    {formatNotificationTime(item.created_at)}
-                  </p>
+            <ol className="px-4 py-4 sm:px-5">
+              {recentActivity.map((item, index) => (
+                <li key={item.id} className="relative flex gap-3 pb-5 last:pb-0">
+                  {index < recentActivity.length - 1 ? (
+                    <span aria-hidden="true" className="absolute bottom-0 left-[0.4375rem] top-4 w-px bg-[var(--color-line)]" />
+                  ) : null}
+                  <span
+                    aria-hidden="true"
+                    className="relative mt-1 h-3.5 w-3.5 shrink-0 rounded-full border-[3px] border-white bg-[var(--color-primary)] ring-1 ring-[var(--color-sky)]"
+                  />
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-900">{item.title}</p>
+                    <p className="mt-0.5 line-clamp-2 text-sm leading-6 text-slate-500">{item.message}</p>
+                    <p className="mt-1 text-xs text-slate-400">{formatNotificationTime(item.created_at)}</p>
+                  </div>
                 </li>
               ))}
             </ol>

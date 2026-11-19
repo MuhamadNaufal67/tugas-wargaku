@@ -38,9 +38,9 @@ function isActivePath(pathname: string, href: string) {
 }
 
 const authButtonClassName =
-  "inline-flex min-h-10 items-center justify-center rounded-lg border border-[var(--color-line)] bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:border-slate-300 hover:bg-slate-50";
+  "inline-flex min-h-10 items-center justify-center rounded-xl bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] hover:bg-[var(--color-primary-strong)]";
 const authButtonLoadingClassName =
-  "inline-flex min-h-10 items-center justify-center rounded-lg border border-[var(--color-line)] bg-white px-4 py-2 text-sm font-semibold text-slate-400";
+  "inline-flex min-h-10 items-center justify-center rounded-xl bg-white/60 px-4 py-2 text-sm font-semibold text-slate-400";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -62,12 +62,12 @@ export default function Navbar() {
 
   return (
     <>
-      <header
-        className={`sticky top-0 z-30 border-b bg-white/95 backdrop-blur ${
-          scrolled ? "border-[var(--color-line)]" : "border-transparent"
-        }`}
-      >
-        <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+      <header className="sticky top-0 z-30 px-3 pt-3 sm:px-4">
+        <div
+          className={`glass mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 rounded-2xl pl-3 pr-2 transition-shadow sm:pl-4 ${
+            scrolled ? "shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_16px_40px_-12px_rgba(13,51,76,0.35)]" : ""
+          }`}
+        >
           <Link href="/" className="flex shrink-0 items-center gap-2.5" aria-label="WargaKu, ke beranda">
             <Image
               src="/logo.png"
@@ -87,20 +87,20 @@ export default function Navbar() {
             </span>
           </Link>
 
-          <nav aria-label="Navigasi utama" className="hidden h-full lg:block">
-            <ul className="flex h-full items-center gap-7">
+          <nav aria-label="Navigasi utama" className="hidden lg:block">
+            <ul className="flex items-center gap-1 rounded-xl bg-white/30 p-1">
               {navigationItems.map((item) => {
                 const active = isActivePath(pathname, item.href);
 
                 return (
-                  <li key={item.href} className="h-full">
+                  <li key={item.href}>
                     <Link
                       href={item.href}
                       aria-current={active ? "page" : undefined}
-                      className={`flex h-full items-center border-b-2 pt-0.5 text-sm font-semibold ${
+                      className={`flex min-h-9 items-center rounded-lg px-3.5 text-sm font-semibold ${
                         active
-                          ? "border-[var(--color-primary)] text-[var(--color-primary)]"
-                          : "border-transparent text-slate-600 hover:text-slate-900"
+                          ? "glass-pill text-[var(--color-primary)]"
+                          : "text-slate-600 hover:bg-white/50 hover:text-slate-900"
                       }`}
                     >
                       {item.label}
@@ -122,7 +122,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setMenuOpen((value) => !value)}
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--color-line)] bg-white text-slate-700 hover:bg-slate-50 lg:hidden"
+              className="glass-pill flex h-10 w-10 items-center justify-center rounded-xl text-slate-700 lg:hidden"
               aria-label={menuOpen ? "Tutup menu" : "Buka menu"}
               aria-expanded={menuOpen}
               aria-controls="mobile-navigation"
@@ -160,25 +160,25 @@ export default function Navbar() {
           aria-label="Tutup menu"
           tabIndex={-1}
           onClick={() => setMenuOpen(false)}
-          className="fixed inset-0 z-40 bg-slate-900/30 lg:hidden"
+          className="fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-[2px] lg:hidden"
         />
       ) : null}
 
       <aside
         ref={mobileMenuRef}
         id="mobile-navigation"
-        className={`fixed inset-y-0 right-0 z-50 w-[min(20rem,88vw)] bg-white shadow-xl transition-transform duration-200 lg:hidden ${
-          menuOpen ? "translate-x-0" : "invisible translate-x-full"
+        className={`glass fixed bottom-3 right-3 top-3 z-50 w-[min(20rem,calc(100vw-1.5rem))] rounded-2xl transition-transform duration-200 lg:hidden ${
+          menuOpen ? "translate-x-0" : "invisible translate-x-[110%]"
         }`}
         aria-hidden={!menuOpen}
       >
         <div className="flex h-full flex-col">
-          <div className="flex h-16 items-center justify-between border-b border-[var(--color-line)] px-4">
+          <div className="flex h-16 items-center justify-between border-b border-white/60 px-4">
             <span className="text-base font-bold text-slate-900">Menu</span>
             <button
               type="button"
               onClick={() => setMenuOpen(false)}
-              className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"
+              className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-white/60"
               aria-label="Tutup menu"
             >
               <svg
@@ -207,10 +207,10 @@ export default function Navbar() {
                       href={item.href}
                       onClick={() => setMenuOpen(false)}
                       aria-current={active ? "page" : undefined}
-                      className={`flex min-h-12 items-center rounded-lg px-3 text-[0.95rem] font-semibold ${
+                      className={`flex min-h-12 items-center rounded-xl px-3 text-[0.95rem] font-semibold ${
                         active
-                          ? "bg-[var(--color-primary-soft)] text-[var(--color-primary)]"
-                          : "text-slate-700 hover:bg-slate-50"
+                          ? "glass-pill text-[var(--color-primary)]"
+                          : "text-slate-700 hover:bg-white/50"
                       }`}
                     >
                       {item.label}
@@ -223,7 +223,7 @@ export default function Navbar() {
                   <Link
                     href="/contact"
                     onClick={() => setMenuOpen(false)}
-                    className="flex min-h-12 items-center rounded-lg px-3 text-[0.95rem] font-semibold text-slate-700 hover:bg-slate-50"
+                    className="flex min-h-12 items-center rounded-xl px-3 text-[0.95rem] font-semibold text-slate-700 hover:bg-white/50"
                   >
                     Bantuan
                   </Link>
@@ -232,7 +232,7 @@ export default function Navbar() {
             </ul>
           </nav>
 
-          <div className="border-t border-[var(--color-line)] p-4">
+          <div className="border-t border-white/60 p-4">
             <AdminAuthButton
               className={`${authButtonClassName} w-full min-h-11`}
               loadingClassName={`${authButtonLoadingClassName} w-full min-h-11`}

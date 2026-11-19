@@ -324,7 +324,7 @@ export default function Notification() {
             void loadNotifications();
           }
         }}
-        className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--color-line)] bg-white text-slate-700 hover:bg-slate-50"
+        className="glass-pill relative flex h-10 w-10 items-center justify-center rounded-xl text-slate-700"
         aria-label={
           unreadCount > 0
             ? `Notifikasi, ${unreadCount} belum dibaca`
@@ -355,7 +355,7 @@ export default function Notification() {
 
       {isOpen ? (
         <div
-          className="fixed inset-x-4 top-[4.25rem] z-50 overflow-hidden rounded-xl border border-[var(--color-line)] bg-white shadow-lg sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-[22rem]"
+          className="glass fixed inset-x-3 top-[5.25rem] z-50 overflow-hidden rounded-2xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-3 sm:w-[22rem]"
           role="dialog"
           aria-label="Panel notifikasi"
         >
@@ -416,7 +416,7 @@ export default function Notification() {
                         isAnnouncement && isFreshAnnouncement
                           ? "bg-orange-50/60"
                           : item.read
-                            ? "bg-white"
+                            ? "bg-transparent"
                             : "bg-[var(--color-primary-soft)]/50"
                       }`}
                     >

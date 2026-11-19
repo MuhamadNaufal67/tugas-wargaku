@@ -4,7 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ToastContainer } from "@/components/Toast";
 import { LetterTemplatePreview } from "@/components/pdf/LetterTemplatePreview";
+import { LetterIcon } from "@/components/ui/LetterIcon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { StatusTracker } from "@/components/ui/StatusTracker";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
@@ -505,6 +507,15 @@ export default function StatusPage() {
   }
 
   const isRejected = (item: PengajuanRow) => item.status.toLowerCase() === "ditolak";
+  const countForFilter = (value: StatusFilter) =>
+    value === "semua"
+      ? dataPengajuan.length
+      : dataPengajuan.filter((item) => {
+          const normalized = item.status.toLowerCase();
+          return value === "selesai"
+            ? normalized === "selesai" || normalized === "diterima"
+            : normalized === value;
+        }).length;
 
   return (
     <div className="space-y-6">
@@ -578,7 +589,7 @@ export default function StatusPage() {
         </div>
 
         <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-          <div role="group" aria-label="Filter status" className="flex w-max gap-2">
+          <div role="group" aria-label="Filter status" className="flex w-max gap-1 rounded-xl bg-white/70 p-1 ring-1 ring-[var(--color-line)]">
             {filterOptions.map((filter) => {
               const isActive = activeFilter === filter.value;
 
@@ -588,13 +599,22 @@ export default function StatusPage() {
                   type="button"
                   aria-pressed={isActive}
                   onClick={() => setActiveFilter(filter.value)}
-                  className={`min-h-10 rounded-full px-4 text-sm font-semibold ${
+                  className={`inline-flex min-h-10 items-center gap-2 rounded-lg px-3.5 text-sm font-semibold ${
                     isActive
-                      ? "bg-slate-900 text-white"
-                      : "border border-[var(--color-line)] bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
+                      ? "bg-[var(--color-primary)] text-white shadow-sm"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                   }`}
                 >
                   {filter.label}
+                  {!isLoading ? (
+                    <span
+                      className={`min-w-5 rounded-full px-1.5 text-xs tabular-nums ${
+                        isActive ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
+                      }`}
+                    >
+                      {countForFilter(filter.value)}
+                    </span>
+                  ) : null}
                 </button>
               );
             })}
@@ -656,14 +676,15 @@ export default function StatusPage() {
             return (
               <li
                 key={item.id}
-                className={`flex flex-col rounded-xl border bg-white ${
+                className={`flex flex-col overflow-hidden rounded-xl border bg-white transition-shadow hover:shadow-[0_8px_24px_-12px_rgba(13,51,76,0.25)] ${
                   item.id === highlightedPengajuanId
                     ? "border-[var(--color-primary)] ring-3 ring-[var(--color-primary)]/15"
                     : "border-[var(--color-line)]"
                 }`}
               >
                 <div className="flex items-start justify-between gap-3 px-4 pt-4 sm:px-5 sm:pt-5">
-                  <div className="min-w-0">
+                  <LetterIcon jenisSurat={item.jenis_surat} />
+                  <div className="min-w-0 flex-1">
                     <h2 className="text-base font-bold text-slate-900">{item.jenis_surat}</h2>
                     <p className="mt-0.5 text-sm text-slate-500">
                       Diajukan {formatTanggal(item.created_at)}
@@ -676,6 +697,10 @@ export default function StatusPage() {
                   <p className="text-sm font-medium text-slate-800">{item.nama}</p>
                   <p className="text-sm tabular-nums text-slate-500">NIK {item.nik}</p>
                   <p className="mt-1 line-clamp-2 text-sm text-slate-500">{item.alamat}</p>
+
+                  <div className="mt-4 rounded-lg bg-slate-50 px-2 pb-2.5 pt-3">
+                    <StatusTracker status={item.status} />
+                  </div>
 
                   {isRejected(item) && item.alasan_penolakan ? (
                     <div className="mt-3 rounded-lg bg-red-50 px-3.5 py-2.5 text-sm leading-6 text-red-800">
@@ -826,6 +851,9 @@ export default function StatusPage() {
             </div>
 
             <div className="overflow-y-auto px-5 py-4">
+              <div className="mb-5 rounded-lg bg-slate-50 px-2 pb-2.5 pt-3">
+                <StatusTracker status={activeSelectedPengajuan.status} />
+              </div>
               <dl className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
                 {[
                   { label: "Nama", value: activeSelectedPengajuan.nama },

@@ -36,6 +36,10 @@ export default function RootLayout({
     >
       <body className="min-h-screen bg-[var(--color-surface)] text-slate-900">
         <AuthProvider>
+          <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+            <div className="absolute -left-40 -top-40 h-[32rem] w-[32rem] rounded-full bg-[var(--color-sky)]/35 blur-3xl" />
+            <div className="absolute -right-32 top-24 h-[26rem] w-[26rem] rounded-full bg-orange-200/40 blur-3xl" />
+          </div>
           <div className="flex min-h-screen flex-col">
             <Navbar />
 
